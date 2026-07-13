@@ -17,6 +17,7 @@ import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedJournalNewRouteImport } from './routes/_authenticated/journal.new'
+import { Route as AuthenticatedJournalIdRouteImport } from './routes/_authenticated/journal.$id'
 
 const CaptureRoute = CaptureRouteImport.update({
   id: '/capture',
@@ -57,6 +58,11 @@ const AuthenticatedJournalNewRoute = AuthenticatedJournalNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AuthenticatedJournalRoute,
 } as any)
+const AuthenticatedJournalIdRoute = AuthenticatedJournalIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedJournalRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -65,6 +71,7 @@ export interface FileRoutesByFullPath {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/journal': typeof AuthenticatedJournalRouteWithChildren
   '/tasks': typeof AuthenticatedTasksRoute
+  '/journal/$id': typeof AuthenticatedJournalIdRoute
   '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesByTo {
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/journal': typeof AuthenticatedJournalRouteWithChildren
   '/tasks': typeof AuthenticatedTasksRoute
+  '/journal/$id': typeof AuthenticatedJournalIdRoute
   '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesById {
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRouteWithChildren
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/journal/$id': typeof AuthenticatedJournalIdRoute
   '/_authenticated/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRouteTypes {
@@ -96,6 +105,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/journal'
     | '/tasks'
+    | '/journal/$id'
     | '/journal/new'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -105,6 +115,7 @@ export interface FileRouteTypes {
     | '/dashboard'
     | '/journal'
     | '/tasks'
+    | '/journal/$id'
     | '/journal/new'
   id:
     | '__root__'
@@ -115,6 +126,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/journal'
     | '/_authenticated/tasks'
+    | '/_authenticated/journal/$id'
     | '/_authenticated/journal/new'
   fileRoutesById: FileRoutesById
 }
@@ -183,14 +195,23 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedJournalNewRouteImport
       parentRoute: typeof AuthenticatedJournalRoute
     }
+    '/_authenticated/journal/$id': {
+      id: '/_authenticated/journal/$id'
+      path: '/$id'
+      fullPath: '/journal/$id'
+      preLoaderRoute: typeof AuthenticatedJournalIdRouteImport
+      parentRoute: typeof AuthenticatedJournalRoute
+    }
   }
 }
 
 interface AuthenticatedJournalRouteChildren {
+  AuthenticatedJournalIdRoute: typeof AuthenticatedJournalIdRoute
   AuthenticatedJournalNewRoute: typeof AuthenticatedJournalNewRoute
 }
 
 const AuthenticatedJournalRouteChildren: AuthenticatedJournalRouteChildren = {
+  AuthenticatedJournalIdRoute: AuthenticatedJournalIdRoute,
   AuthenticatedJournalNewRoute: AuthenticatedJournalNewRoute,
 }
 
