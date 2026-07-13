@@ -14,6 +14,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
@@ -44,6 +45,11 @@ const IndexRoute = IndexRouteImport.update({
 const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
   id: '/tasks',
   path: '/tasks',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLearnRoute = AuthenticatedLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
@@ -89,6 +95,7 @@ export interface FileRoutesByFullPath {
   '/archive': typeof AuthenticatedArchiveRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/archive/$id': typeof AuthenticatedArchiveIdRoute
   '/archive/new': typeof AuthenticatedArchiveNewRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/archive': typeof AuthenticatedArchiveRouteWithChildren
   '/dashboard': typeof AuthenticatedDashboardRoute
   '/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
   '/tasks': typeof AuthenticatedTasksRoute
   '/archive/$id': typeof AuthenticatedArchiveIdRoute
   '/archive/new': typeof AuthenticatedArchiveNewRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/_authenticated/archive': typeof AuthenticatedArchiveRouteWithChildren
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
   '/_authenticated/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/_authenticated/learn': typeof AuthenticatedLearnRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
   '/_authenticated/archive/$id': typeof AuthenticatedArchiveIdRoute
   '/_authenticated/archive/new': typeof AuthenticatedArchiveNewRoute
@@ -132,6 +141,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/dashboard'
     | '/journal'
+    | '/learn'
     | '/tasks'
     | '/archive/$id'
     | '/archive/new'
@@ -145,6 +155,7 @@ export interface FileRouteTypes {
     | '/archive'
     | '/dashboard'
     | '/journal'
+    | '/learn'
     | '/tasks'
     | '/archive/$id'
     | '/archive/new'
@@ -159,6 +170,7 @@ export interface FileRouteTypes {
     | '/_authenticated/archive'
     | '/_authenticated/dashboard'
     | '/_authenticated/journal'
+    | '/_authenticated/learn'
     | '/_authenticated/tasks'
     | '/_authenticated/archive/$id'
     | '/_authenticated/archive/new'
@@ -208,6 +220,13 @@ declare module '@tanstack/react-router' {
       path: '/tasks'
       fullPath: '/tasks'
       preLoaderRoute: typeof AuthenticatedTasksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/learn': {
+      id: '/_authenticated/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof AuthenticatedLearnRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/journal': {
@@ -292,6 +311,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRouteWithChildren
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
   AuthenticatedJournalRoute: typeof AuthenticatedJournalRouteWithChildren
+  AuthenticatedLearnRoute: typeof AuthenticatedLearnRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
 }
 
@@ -299,6 +319,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedArchiveRoute: AuthenticatedArchiveRouteWithChildren,
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
   AuthenticatedJournalRoute: AuthenticatedJournalRouteWithChildren,
+  AuthenticatedLearnRoute: AuthenticatedLearnRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
 }
 
