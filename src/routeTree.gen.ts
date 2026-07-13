@@ -9,38 +9,217 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as CaptureRouteImport } from './routes/capture'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
+import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
+import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
+import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
+import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedArchiveRouteImport } from './routes/_authenticated/archive'
+import { Route as AuthenticatedJournalNewRouteImport } from './routes/_authenticated/journal.new'
+import { Route as AuthenticatedJournalIdRouteImport } from './routes/_authenticated/journal.$id'
+import { Route as AuthenticatedArchiveNewRouteImport } from './routes/_authenticated/archive.new'
+import { Route as AuthenticatedArchiveIdRouteImport } from './routes/_authenticated/archive.$id'
 
+const CaptureRoute = CaptureRouteImport.update({
+  id: '/capture',
+  path: '/capture',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedTasksRoute = AuthenticatedTasksRouteImport.update({
+  id: '/tasks',
+  path: '/tasks',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedLearnRoute = AuthenticatedLearnRouteImport.update({
+  id: '/learn',
+  path: '/learn',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedJournalRoute = AuthenticatedJournalRouteImport.update({
+  id: '/journal',
+  path: '/journal',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedArchiveRoute = AuthenticatedArchiveRouteImport.update({
+  id: '/archive',
+  path: '/archive',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedJournalNewRoute = AuthenticatedJournalNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedJournalRoute,
+} as any)
+const AuthenticatedJournalIdRoute = AuthenticatedJournalIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedJournalRoute,
+} as any)
+const AuthenticatedArchiveNewRoute = AuthenticatedArchiveNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedArchiveRoute,
+} as any)
+const AuthenticatedArchiveIdRoute = AuthenticatedArchiveIdRouteImport.update({
+  id: '/$id',
+  path: '/$id',
+  getParentRoute: () => AuthenticatedArchiveRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/capture': typeof CaptureRoute
+  '/archive': typeof AuthenticatedArchiveRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/tasks': typeof AuthenticatedTasksRoute
+  '/archive/$id': typeof AuthenticatedArchiveIdRoute
+  '/archive/new': typeof AuthenticatedArchiveNewRoute
+  '/journal/$id': typeof AuthenticatedJournalIdRoute
+  '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/auth': typeof AuthRoute
+  '/capture': typeof CaptureRoute
+  '/archive': typeof AuthenticatedArchiveRouteWithChildren
+  '/dashboard': typeof AuthenticatedDashboardRoute
+  '/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/learn': typeof AuthenticatedLearnRoute
+  '/settings': typeof AuthenticatedSettingsRoute
+  '/tasks': typeof AuthenticatedTasksRoute
+  '/archive/$id': typeof AuthenticatedArchiveIdRoute
+  '/archive/new': typeof AuthenticatedArchiveNewRoute
+  '/journal/$id': typeof AuthenticatedJournalIdRoute
+  '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/auth': typeof AuthRoute
+  '/capture': typeof CaptureRoute
+  '/_authenticated/archive': typeof AuthenticatedArchiveRouteWithChildren
+  '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/journal': typeof AuthenticatedJournalRouteWithChildren
+  '/_authenticated/learn': typeof AuthenticatedLearnRoute
+  '/_authenticated/settings': typeof AuthenticatedSettingsRoute
+  '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/archive/$id': typeof AuthenticatedArchiveIdRoute
+  '/_authenticated/archive/new': typeof AuthenticatedArchiveNewRoute
+  '/_authenticated/journal/$id': typeof AuthenticatedJournalIdRoute
+  '/_authenticated/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/archive'
+    | '/dashboard'
+    | '/journal'
+    | '/learn'
+    | '/settings'
+    | '/tasks'
+    | '/archive/$id'
+    | '/archive/new'
+    | '/journal/$id'
+    | '/journal/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/archive'
+    | '/dashboard'
+    | '/journal'
+    | '/learn'
+    | '/settings'
+    | '/tasks'
+    | '/archive/$id'
+    | '/archive/new'
+    | '/journal/$id'
+    | '/journal/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/_authenticated'
+    | '/auth'
+    | '/capture'
+    | '/_authenticated/archive'
+    | '/_authenticated/dashboard'
+    | '/_authenticated/journal'
+    | '/_authenticated/learn'
+    | '/_authenticated/settings'
+    | '/_authenticated/tasks'
+    | '/_authenticated/archive/$id'
+    | '/_authenticated/archive/new'
+    | '/_authenticated/journal/$id'
+    | '/_authenticated/journal/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  AuthRoute: typeof AuthRoute
+  CaptureRoute: typeof CaptureRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/capture': {
+      id: '/capture'
+      path: '/capture'
+      fullPath: '/capture'
+      preLoaderRoute: typeof CaptureRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_authenticated': {
+      id: '/_authenticated'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,22 +227,132 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/tasks': {
+      id: '/_authenticated/tasks'
+      path: '/tasks'
+      fullPath: '/tasks'
+      preLoaderRoute: typeof AuthenticatedTasksRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/settings': {
+      id: '/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof AuthenticatedSettingsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/learn': {
+      id: '/_authenticated/learn'
+      path: '/learn'
+      fullPath: '/learn'
+      preLoaderRoute: typeof AuthenticatedLearnRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/journal': {
+      id: '/_authenticated/journal'
+      path: '/journal'
+      fullPath: '/journal'
+      preLoaderRoute: typeof AuthenticatedJournalRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/dashboard': {
+      id: '/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AuthenticatedDashboardRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/archive': {
+      id: '/_authenticated/archive'
+      path: '/archive'
+      fullPath: '/archive'
+      preLoaderRoute: typeof AuthenticatedArchiveRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/journal/new': {
+      id: '/_authenticated/journal/new'
+      path: '/new'
+      fullPath: '/journal/new'
+      preLoaderRoute: typeof AuthenticatedJournalNewRouteImport
+      parentRoute: typeof AuthenticatedJournalRoute
+    }
+    '/_authenticated/journal/$id': {
+      id: '/_authenticated/journal/$id'
+      path: '/$id'
+      fullPath: '/journal/$id'
+      preLoaderRoute: typeof AuthenticatedJournalIdRouteImport
+      parentRoute: typeof AuthenticatedJournalRoute
+    }
+    '/_authenticated/archive/new': {
+      id: '/_authenticated/archive/new'
+      path: '/new'
+      fullPath: '/archive/new'
+      preLoaderRoute: typeof AuthenticatedArchiveNewRouteImport
+      parentRoute: typeof AuthenticatedArchiveRoute
+    }
+    '/_authenticated/archive/$id': {
+      id: '/_authenticated/archive/$id'
+      path: '/$id'
+      fullPath: '/archive/$id'
+      preLoaderRoute: typeof AuthenticatedArchiveIdRouteImport
+      parentRoute: typeof AuthenticatedArchiveRoute
+    }
   }
 }
 
+interface AuthenticatedArchiveRouteChildren {
+  AuthenticatedArchiveIdRoute: typeof AuthenticatedArchiveIdRoute
+  AuthenticatedArchiveNewRoute: typeof AuthenticatedArchiveNewRoute
+}
+
+const AuthenticatedArchiveRouteChildren: AuthenticatedArchiveRouteChildren = {
+  AuthenticatedArchiveIdRoute: AuthenticatedArchiveIdRoute,
+  AuthenticatedArchiveNewRoute: AuthenticatedArchiveNewRoute,
+}
+
+const AuthenticatedArchiveRouteWithChildren =
+  AuthenticatedArchiveRoute._addFileChildren(AuthenticatedArchiveRouteChildren)
+
+interface AuthenticatedJournalRouteChildren {
+  AuthenticatedJournalIdRoute: typeof AuthenticatedJournalIdRoute
+  AuthenticatedJournalNewRoute: typeof AuthenticatedJournalNewRoute
+}
+
+const AuthenticatedJournalRouteChildren: AuthenticatedJournalRouteChildren = {
+  AuthenticatedJournalIdRoute: AuthenticatedJournalIdRoute,
+  AuthenticatedJournalNewRoute: AuthenticatedJournalNewRoute,
+}
+
+const AuthenticatedJournalRouteWithChildren =
+  AuthenticatedJournalRoute._addFileChildren(AuthenticatedJournalRouteChildren)
+
+interface AuthenticatedRouteRouteChildren {
+  AuthenticatedArchiveRoute: typeof AuthenticatedArchiveRouteWithChildren
+  AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedJournalRoute: typeof AuthenticatedJournalRouteWithChildren
+  AuthenticatedLearnRoute: typeof AuthenticatedLearnRoute
+  AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
+  AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
+}
+
+const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedArchiveRoute: AuthenticatedArchiveRouteWithChildren,
+  AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedJournalRoute: AuthenticatedJournalRouteWithChildren,
+  AuthenticatedLearnRoute: AuthenticatedLearnRoute,
+  AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
+  AuthenticatedTasksRoute: AuthenticatedTasksRoute,
+}
+
+const AuthenticatedRouteRouteWithChildren =
+  AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  AuthRoute: AuthRoute,
+  CaptureRoute: CaptureRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}
