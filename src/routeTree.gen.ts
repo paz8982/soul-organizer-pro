@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedJournalRouteImport } from './routes/_authenticated/journal'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
+import { Route as AuthenticatedJournalNewRouteImport } from './routes/_authenticated/journal.new'
 
 const CaptureRoute = CaptureRouteImport.update({
   id: '/capture',
@@ -51,22 +52,29 @@ const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedJournalNewRoute = AuthenticatedJournalNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AuthenticatedJournalRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/journal': typeof AuthenticatedJournalRoute
+  '/journal': typeof AuthenticatedJournalRouteWithChildren
   '/tasks': typeof AuthenticatedTasksRoute
+  '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
-  '/journal': typeof AuthenticatedJournalRoute
+  '/journal': typeof AuthenticatedJournalRouteWithChildren
   '/tasks': typeof AuthenticatedTasksRoute
+  '/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -75,14 +83,29 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
-  '/_authenticated/journal': typeof AuthenticatedJournalRoute
+  '/_authenticated/journal': typeof AuthenticatedJournalRouteWithChildren
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
+  '/_authenticated/journal/new': typeof AuthenticatedJournalNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/auth' | '/capture' | '/dashboard' | '/journal' | '/tasks'
+  fullPaths:
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/dashboard'
+    | '/journal'
+    | '/tasks'
+    | '/journal/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/auth' | '/capture' | '/dashboard' | '/journal' | '/tasks'
+  to:
+    | '/'
+    | '/auth'
+    | '/capture'
+    | '/dashboard'
+    | '/journal'
+    | '/tasks'
+    | '/journal/new'
   id:
     | '__root__'
     | '/'
@@ -92,6 +115,7 @@ export interface FileRouteTypes {
     | '/_authenticated/dashboard'
     | '/_authenticated/journal'
     | '/_authenticated/tasks'
+    | '/_authenticated/journal/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -152,18 +176,36 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedDashboardRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/journal/new': {
+      id: '/_authenticated/journal/new'
+      path: '/new'
+      fullPath: '/journal/new'
+      preLoaderRoute: typeof AuthenticatedJournalNewRouteImport
+      parentRoute: typeof AuthenticatedJournalRoute
+    }
   }
 }
 
+interface AuthenticatedJournalRouteChildren {
+  AuthenticatedJournalNewRoute: typeof AuthenticatedJournalNewRoute
+}
+
+const AuthenticatedJournalRouteChildren: AuthenticatedJournalRouteChildren = {
+  AuthenticatedJournalNewRoute: AuthenticatedJournalNewRoute,
+}
+
+const AuthenticatedJournalRouteWithChildren =
+  AuthenticatedJournalRoute._addFileChildren(AuthenticatedJournalRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
-  AuthenticatedJournalRoute: typeof AuthenticatedJournalRoute
+  AuthenticatedJournalRoute: typeof AuthenticatedJournalRouteWithChildren
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
-  AuthenticatedJournalRoute: AuthenticatedJournalRoute,
+  AuthenticatedJournalRoute: AuthenticatedJournalRouteWithChildren,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
 }
 
