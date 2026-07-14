@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/command";
 import { globalSearch } from "@/lib/search.functions";
 import { CheckSquare, BookHeart, Archive } from "lucide-react";
+import { t, formatDateShort } from "@/lib/i18n";
 
 export function GlobalSearch({
   open,
@@ -47,32 +48,32 @@ export function GlobalSearch({
 
   return (
     <CommandDialog open={open} onOpenChange={onOpenChange}>
-      <CommandInput placeholder="Search tasks, journal, archive…" value={q} onValueChange={setQ} />
+      <CommandInput placeholder={t("label.searchAll")} value={q} onValueChange={setQ} />
       <CommandList>
-        {q && <CommandEmpty>No results found.</CommandEmpty>}
+        {q && <CommandEmpty>{t("error.noResults")}</CommandEmpty>}
         {data?.tasks && data.tasks.length > 0 && (
-          <CommandGroup heading="Tasks">
-            {data.tasks.map((t: any) => (
-              <CommandItem key={t.id} onSelect={() => go("/tasks")}>
-                <CheckSquare className="mr-2 h-4 w-4" /> {t.title}
+          <CommandGroup heading={t("nav.tasks")}>
+            {data.tasks.map((task: any) => (
+              <CommandItem key={task.id} onSelect={() => go("/tasks")}>
+                <CheckSquare className="ms-2 h-4 w-4" /> {task.title}
               </CommandItem>
             ))}
           </CommandGroup>
         )}
         {data?.journal && data.journal.length > 0 && (
-          <CommandGroup heading="Journal">
+          <CommandGroup heading={t("nav.journal")}>
             {data.journal.map((j: any) => (
               <CommandItem key={j.id} onSelect={() => go(`/journal/${j.id}`)}>
-                <BookHeart className="mr-2 h-4 w-4" /> {j.title || j.entry_date}
+                <BookHeart className="ms-2 h-4 w-4" /> {j.title || formatDateShort(j.entry_date)}
               </CommandItem>
             ))}
           </CommandGroup>
         )}
         {data?.archive && data.archive.length > 0 && (
-          <CommandGroup heading="Archive">
+          <CommandGroup heading={t("nav.archive")}>
             {data.archive.map((a: any) => (
               <CommandItem key={a.id} onSelect={() => go(`/archive/${a.id}`)}>
-                <Archive className="mr-2 h-4 w-4" /> {a.title}
+                <Archive className="ms-2 h-4 w-4" /> {a.title}
               </CommandItem>
             ))}
           </CommandGroup>

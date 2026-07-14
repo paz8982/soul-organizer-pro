@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { MoodPicker } from "@/components/mood-picker";
 import { TagInput } from "@/components/tag-input";
 import { toast } from "sonner";
+import { t, formatWeekday } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/journal/new")({
   component: NewJournalEntry,
@@ -39,46 +40,46 @@ function NewJournalEntry() {
       }),
     onSuccess: (row: any) => {
       qc.invalidateQueries();
-      toast.success("Entry saved");
+      toast.success(t("journal.saved"));
       navigate({ to: "/journal/$id", params: { id: row.id } });
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
   });
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="New entry" description={new Date(entryDate).toLocaleDateString(undefined, { weekday: "long", month: "long", day: "numeric" })} />
+      <PageHeader title={t("journal.newTitle")} description={formatWeekday(entryDate)} />
       <Card className="p-6 space-y-5">
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Date</Label>
+            <Label>{t("label.date")}</Label>
             <Input type="date" value={entryDate} onChange={(e) => setEntryDate(e.target.value)} />
           </div>
           <div className="space-y-2">
-            <Label>Title (optional)</Label>
-            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="A word or two…" />
+            <Label>{t("label.titleOptional")}</Label>
+            <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("journal.titleShort")} />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label>How are you feeling?</Label>
+          <Label>{t("label.mood")}</Label>
           <MoodPicker value={mood} onChange={setMood} />
         </div>
 
         <div className="space-y-2">
-          <Label>Thoughts</Label>
-          <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={12} placeholder="Write freely…" className="font-sans leading-relaxed" />
+          <Label>{t("label.thoughts")}</Label>
+          <Textarea value={body} onChange={(e) => setBody(e.target.value)} rows={12} placeholder={t("journal.body")} className="font-sans leading-relaxed" />
         </div>
 
         <div className="space-y-2">
-          <Label>Tags</Label>
+          <Label>{t("label.tags")}</Label>
           <TagInput value={tags} onChange={setTags} />
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => navigate({ to: "/journal" })}>Cancel</Button>
+          <Button variant="ghost" onClick={() => navigate({ to: "/journal" })}>{t("action.cancel")}</Button>
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || (!body && !title)}>
-            Save entry
+            {t("action.save")}
           </Button>
         </div>
       </Card>

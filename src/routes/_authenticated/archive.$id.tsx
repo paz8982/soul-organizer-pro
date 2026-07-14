@@ -9,8 +9,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { TagInput } from "@/components/tag-input";
-import { ArrowLeft, Trash2, ExternalLink, Download } from "lucide-react";
+import { ArrowRight, Trash2, ExternalLink, Download } from "lucide-react";
 import { toast } from "sonner";
+import { t, itemTypeLabel } from "@/lib/i18n";
 
 const itemQuery = (id: string) =>
   queryOptions({
@@ -54,7 +55,7 @@ function ArchiveDetail() {
       }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Saved");
+      toast.success(t("action.saved"));
     },
   });
 
@@ -62,21 +63,21 @@ function ArchiveDetail() {
     mutationFn: () => deleteArchiveItem({ data: { id } }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Deleted");
+      toast.success(t("action.deleted"));
       navigate({ to: "/archive" });
     },
   });
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/archive" })} className="mb-3 -ml-2">
-        <ArrowLeft className="mr-1 h-4 w-4" /> Archive
+      <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/archive" })} className="mb-3 -ms-2">
+        <ArrowRight className="ms-1 h-4 w-4" /> {t("archive.back")}
       </Button>
       <PageHeader
         title={title}
-        description={data.item_type.toUpperCase()}
+        description={itemTypeLabel(data.item_type)}
         action={
-          <Button variant="ghost" size="icon" onClick={() => confirm("Delete this item?") && delMut.mutate()}>
+          <Button variant="ghost" size="icon" onClick={() => confirm(t("archive.confirmDelete")) && delMut.mutate()}>
             <Trash2 className="h-4 w-4" />
           </Button>
         }
@@ -85,7 +86,7 @@ function ArchiveDetail() {
       {/* Preview */}
       {data.url && (
         <Card className="mb-4 p-4">
-          <a href={data.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-primary hover:underline">
+          <a href={data.url} target="_blank" rel="noreferrer" dir="ltr" className="flex items-center gap-2 text-sm text-primary hover:underline">
             <ExternalLink className="h-4 w-4" /> {data.url}
           </a>
         </Card>
@@ -103,30 +104,30 @@ function ArchiveDetail() {
       {signed?.url && !data.file_mime?.startsWith("image/") && data.file_mime !== "application/pdf" && (
         <Card className="mb-4 p-4">
           <a href={signed.url} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 text-sm text-primary hover:underline">
-            <Download className="h-4 w-4" /> Download file
+            <Download className="h-4 w-4" /> {t("archive.downloadFile")}
           </a>
         </Card>
       )}
 
       <Card className="space-y-5 p-6">
         <div className="space-y-2">
-          <Label>Title</Label>
+          <Label>{t("label.title")}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label>Description</Label>
+          <Label>{t("label.description")}</Label>
           <Input value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
         <div className="space-y-2">
-          <Label>Notes</Label>
+          <Label>{t("label.notes")}</Label>
           <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={5} />
         </div>
         <div className="space-y-2">
-          <Label>Tags</Label>
+          <Label>{t("label.tags")}</Label>
           <TagInput value={tags} onChange={setTags} />
         </div>
         <div className="flex justify-end">
-          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>Save changes</Button>
+          <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>{t("action.saveChanges")}</Button>
         </div>
       </Card>
     </div>

@@ -1,7 +1,9 @@
 {
-  "name": "Personal Life OS",
-  "short_name": "Life OS",
-  "description": "Tasks, journal, and personal archive — one calm place.",
+  "name": "המוח השני",
+  "short_name": "מוח שני",
+  "description": "מקום שקט אחד למשימות, יומן וארכיון אישי.",
+  "lang": "he",
+  "dir": "rtl",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

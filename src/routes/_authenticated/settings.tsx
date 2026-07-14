@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
 import { LogOut, Download, Moon } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 const profileQuery = queryOptions({
   queryKey: ["profile"],
@@ -46,20 +47,20 @@ function SettingsPage() {
     mutationFn: () => updateProfile({ data: { display_name: displayName } }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Profile saved");
+      toast.success(t("settings.profileSaved"));
     },
   });
 
   const handleExport = async () => {
-    const data = await exportAllData();
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    const payload = await exportAllData();
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `life-os-export-${new Date().toISOString().slice(0, 10)}.json`;
+    a.download = `second-brain-export-${new Date().toISOString().slice(0, 10)}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    toast.success("Downloaded");
+    toast.success(t("settings.downloaded"));
   };
 
   const handleSignOut = async () => {
@@ -72,34 +73,34 @@ function SettingsPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Settings" description="Preferences and account." />
+      <PageHeader title={t("settings.title")} description={t("settings.subtitle")} />
 
       <div className="space-y-4">
         <Card className="p-6">
-          <h2 className="mb-4 font-display text-xl">Account</h2>
+          <h2 className="mb-4 font-display text-xl">{t("settings.account")}</h2>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label>Email</Label>
-              <Input value={data.email ?? ""} disabled />
+              <Label>{t("label.email")}</Label>
+              <Input value={data.email ?? ""} disabled dir="ltr" />
             </div>
             <div className="space-y-2">
-              <Label>Display name</Label>
+              <Label>{t("label.displayName")}</Label>
               <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} />
             </div>
             <div className="flex justify-end">
-              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>Save</Button>
+              <Button onClick={() => saveMut.mutate()} disabled={saveMut.isPending}>{t("action.save")}</Button>
             </div>
           </div>
         </Card>
 
         <Card className="p-6">
-          <h2 className="mb-4 font-display text-xl">Appearance</h2>
+          <h2 className="mb-4 font-display text-xl">{t("settings.appearance")}</h2>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <Moon className="h-4 w-4 text-muted-foreground" />
               <div>
-                <p className="font-medium">Dark mode</p>
-                <p className="text-xs text-muted-foreground">Soft plum darkness.</p>
+                <p className="font-medium">{t("settings.darkMode")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.darkModeHint")}</p>
               </div>
             </div>
             <Switch checked={dark} onCheckedChange={applyTheme} />
@@ -107,29 +108,29 @@ function SettingsPage() {
         </Card>
 
         <Card className="p-6">
-          <h2 className="mb-4 font-display text-xl">Data</h2>
+          <h2 className="mb-4 font-display text-xl">{t("settings.data")}</h2>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-medium">Export everything</p>
-                <p className="text-xs text-muted-foreground">Download all your data as a JSON file.</p>
+                <p className="font-medium">{t("settings.export")}</p>
+                <p className="text-xs text-muted-foreground">{t("settings.exportHint")}</p>
               </div>
               <Button variant="outline" onClick={handleExport}>
-                <Download className="mr-1.5 h-4 w-4" /> Export
+                <Download className="ms-1.5 h-4 w-4" /> {t("action.export")}
               </Button>
             </div>
-            <p className="text-xs text-muted-foreground">Automated cloud backup coming soon.</p>
+            <p className="text-xs text-muted-foreground">{t("settings.backupSoon")}</p>
           </div>
         </Card>
 
         <Card className="p-6">
           <div className="flex items-center justify-between">
             <div>
-              <p className="font-medium">Sign out</p>
-              <p className="text-xs text-muted-foreground">You'll need to sign back in.</p>
+              <p className="font-medium">{t("settings.signOut")}</p>
+              <p className="text-xs text-muted-foreground">{t("settings.signOutHint")}</p>
             </div>
             <Button variant="outline" onClick={handleSignOut}>
-              <LogOut className="mr-1.5 h-4 w-4" /> Sign out
+              <LogOut className="ms-1.5 h-4 w-4" /> {t("nav.signOut")}
             </Button>
           </div>
         </Card>

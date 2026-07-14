@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TagInput } from "@/components/tag-input";
 import { Upload, Loader2 } from "lucide-react";
 import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/_authenticated/archive/new")({
   validateSearch: z.object({
@@ -51,8 +52,8 @@ function NewArchiveItem() {
 
   const mut = useMutation({
     mutationFn: async () => {
-      let payload: any = {
-        title: title || (url ? url : file?.name ?? "Untitled"),
+      const payload: any = {
+        title: title || (url ? url : file?.name ?? "ללא כותרת"),
         description: description || null,
         notes: notes || null,
         tags,
@@ -68,7 +69,7 @@ function NewArchiveItem() {
         setUploading(true);
         const { data: userRes } = await supabase.auth.getUser();
         const userId = userRes.user?.id;
-        if (!userId) throw new Error("Not signed in");
+        if (!userId) throw new Error(t("archive.notSignedIn"));
         const ext = file.name.split(".").pop() ?? "bin";
         const path = `${userId}/archive/${crypto.randomUUID()}.${ext}`;
         const { error: upErr } = await supabase.storage.from("archive").upload(path, file, {
@@ -81,30 +82,30 @@ function NewArchiveItem() {
         payload.file_mime = file.type;
         payload.file_size = file.size;
       } else {
-        throw new Error("Please choose a file");
+        throw new Error(t("archive.pleasePickFile"));
       }
       return createArchiveItem({ data: payload });
     },
     onSuccess: (row: any) => {
       qc.invalidateQueries();
-      toast.success("Saved to archive");
+      toast.success(t("archive.saved"));
       navigate({ to: "/archive/$id", params: { id: row.id } });
     },
     onError: (e) => {
-      toast.error(e instanceof Error ? e.message : "Failed");
+      toast.error(e instanceof Error ? e.message : t("action.failed"));
       setUploading(false);
     },
   });
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Save to archive" description={source === "share" ? "Shared from another app." : "What would you like to keep?"} />
+      <PageHeader title={t("archive.newTitle")} description={source === "share" ? t("archive.subtitleShared") : t("archive.subtitleManual")} />
       <Card className="p-6 space-y-5">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="file">File</TabsTrigger>
-            <TabsTrigger value="link">Link</TabsTrigger>
-            <TabsTrigger value="note">Note</TabsTrigger>
+            <TabsTrigger value="file">{t("archive.tab.file")}</TabsTrigger>
+            <TabsTrigger value="link">{t("archive.tab.link")}</TabsTrigger>
+            <TabsTrigger value="note">{t("archive.tab.note")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="file" className="pt-4">
@@ -121,8 +122,8 @@ function NewArchiveItem() {
                 </>
               ) : (
                 <>
-                  <p className="text-sm font-medium">Click to choose a file</p>
-                  <p className="text-xs text-muted-foreground">Images, PDFs, docs — anything.</p>
+                  <p className="text-sm font-medium">{t("archive.pickFile")}</p>
+                  <p className="text-xs text-muted-foreground">{t("archive.pickFileHint")}</p>
                 </>
               )}
               <input
@@ -141,43 +142,43 @@ function NewArchiveItem() {
           </TabsContent>
 
           <TabsContent value="link" className="pt-4 space-y-2">
-            <Label>URL</Label>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder="https://…" />
+            <Label>{t("label.url")}</Label>
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("archive.urlPlaceholder")} dir="ltr" />
           </TabsContent>
 
           <TabsContent value="note" className="pt-4 space-y-2">
-            <Label>Note</Label>
-            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={6} placeholder="Anything you want to remember…" />
+            <Label>{t("label.note")}</Label>
+            <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={6} placeholder={t("archive.notePlaceholder")} />
           </TabsContent>
         </Tabs>
 
         <div className="space-y-2">
-          <Label>Title</Label>
+          <Label>{t("label.title")}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
         </div>
 
         <div className="space-y-2">
-          <Label>Description (optional)</Label>
+          <Label>{t("label.descriptionOptional")}</Label>
           <Input value={description} onChange={(e) => setDescription(e.target.value)} />
         </div>
 
         {tab !== "note" && (
           <div className="space-y-2">
-            <Label>Notes (optional)</Label>
+            <Label>{t("label.notesOptional")}</Label>
             <Textarea value={notes} onChange={(e) => setNotes(e.target.value)} rows={3} />
           </div>
         )}
 
         <div className="space-y-2">
-          <Label>Tags</Label>
+          <Label>{t("label.tags")}</Label>
           <TagInput value={tags} onChange={setTags} />
         </div>
 
         <div className="flex justify-end gap-2">
-          <Button variant="ghost" onClick={() => navigate({ to: "/archive" })}>Cancel</Button>
+          <Button variant="ghost" onClick={() => navigate({ to: "/archive" })}>{t("action.cancel")}</Button>
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || uploading}>
-            {(mut.isPending || uploading) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Save
+            {(mut.isPending || uploading) && <Loader2 className="ms-2 h-4 w-4 animate-spin" />}
+            {t("action.save")}
           </Button>
         </div>
       </Card>
