@@ -9,13 +9,14 @@ import { Label } from "@/components/ui/label";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { t } from "@/lib/i18n";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ next: z.string().optional() }),
   head: () => ({
     meta: [
-      { title: "Sign in — Personal Life OS" },
-      { name: "description", content: "Sign in to your Personal Life OS." },
+      { title: "כניסה — המוח השני" },
+      { name: "description", content: "התחברות למרחב האישי שלך." },
     ],
   }),
   component: AuthPage,
@@ -46,14 +47,14 @@ function AuthPage() {
           options: { emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast.success("Account created. Check your email to confirm.");
+        toast.success(t("auth.accountCreated"));
       } else {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
         navigate({ to: search.next ?? "/dashboard", replace: true });
       }
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Authentication failed");
+      toast.error(err instanceof Error ? err.message : t("auth.failed"));
     } finally {
       setLoading(false);
     }
@@ -69,7 +70,7 @@ function AuthPage() {
       if (result.redirected) return;
       navigate({ to: search.next ?? "/dashboard", replace: true });
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : "Google sign-in failed");
+      toast.error(err instanceof Error ? err.message : t("auth.googleFailed"));
     } finally {
       setLoading(false);
     }
@@ -79,19 +80,18 @@ function AuthPage() {
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
-          <h1 className="font-display text-4xl italic text-primary">Personal Life OS</h1>
-          <p className="mt-2 text-sm text-muted-foreground">
-            One calm place for tasks, journal, and archive.
-          </p>
+          <h1 className="font-display text-4xl text-primary">{t("app.name")}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{t("auth.subtitle")}</p>
         </div>
 
         <Card className="soft-shadow p-6">
           <form onSubmit={handleEmail} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("label.email")}</Label>
               <Input
                 id="email"
                 type="email"
+                dir="ltr"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,10 +99,11 @@ function AuthPage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
+              <Label htmlFor="password">{t("label.password")}</Label>
               <Input
                 id="password"
                 type="password"
+                dir="ltr"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -111,8 +112,8 @@ function AuthPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {mode === "signup" ? "Create account" : "Sign in"}
+              {loading && <Loader2 className="ms-2 h-4 w-4 animate-spin" />}
+              {mode === "signup" ? t("auth.createAccount") : t("auth.signIn")}
             </Button>
           </form>
 
@@ -121,7 +122,7 @@ function AuthPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase tracking-wider">
-              <span className="bg-card px-2 text-muted-foreground">or</span>
+              <span className="bg-card px-2 text-muted-foreground">{t("auth.or")}</span>
             </div>
           </div>
 
@@ -132,18 +133,18 @@ function AuthPage() {
             onClick={handleGoogle}
             disabled={loading}
           >
-            <GoogleIcon className="mr-2 h-4 w-4" />
-            Continue with Google
+            <GoogleIcon className="ms-2 h-4 w-4" />
+            {t("auth.google")}
           </Button>
 
           <p className="mt-6 text-center text-sm text-muted-foreground">
-            {mode === "signin" ? "New here?" : "Already have an account?"}{" "}
+            {mode === "signin" ? t("auth.newHere") : t("auth.haveAccount")}{" "}
             <button
               type="button"
               onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
               className="font-medium text-primary hover:underline"
             >
-              {mode === "signin" ? "Create an account" : "Sign in"}
+              {mode === "signin" ? t("auth.createAccount") : t("auth.signIn")}
             </button>
           </p>
         </Card>

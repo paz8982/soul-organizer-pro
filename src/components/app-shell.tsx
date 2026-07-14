@@ -17,16 +17,17 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/global-search";
 import { QuickAddDialog } from "@/components/quick-add-dialog";
+import { t } from "@/lib/i18n";
 
-type NavItem = { to: string; label: string; icon: typeof LayoutDashboard };
+type NavItem = { to: string; labelKey: string; icon: typeof LayoutDashboard };
 
 const NAV: NavItem[] = [
-  { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { to: "/tasks", label: "Tasks", icon: CheckSquare },
-  { to: "/journal", label: "Journal", icon: BookHeart },
-  { to: "/archive", label: "Archive", icon: Archive },
-  { to: "/learn", label: "Learn", icon: Sparkles },
-  { to: "/settings", label: "Settings", icon: Settings },
+  { to: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { to: "/tasks", labelKey: "nav.tasks", icon: CheckSquare },
+  { to: "/journal", labelKey: "nav.journal", icon: BookHeart },
+  { to: "/archive", labelKey: "nav.archive", icon: Archive },
+  { to: "/learn", labelKey: "nav.learn", icon: Sparkles },
+  { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ];
 
 export function AppShell({ children }: { children: ReactNode }) {
@@ -48,14 +49,14 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r bg-sidebar px-4 py-6 md:flex">
+      <aside className="hidden w-60 shrink-0 flex-col border-l bg-sidebar px-4 py-6 md:flex">
         <Link to="/dashboard" className="mb-8 flex items-center gap-2 px-2">
-          <div className="grid h-9 w-9 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-            <span className="font-display text-xl italic">L</span>
+          <div className="grid h-9 w-9 shrink-0 place-items-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+            <span className="font-display text-xl">מ</span>
           </div>
           <div className="min-w-0">
-            <p className="truncate font-display text-lg leading-none">Life OS</p>
-            <p className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground">Personal</p>
+            <p className="truncate font-display text-lg leading-none">{t("app.name")}</p>
+            <p className="mt-1 text-[11px] uppercase tracking-widest text-muted-foreground">אישי</p>
           </div>
         </Link>
 
@@ -75,37 +76,37 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-4 w-4 shrink-0" />
-                <span className="truncate">{item.label}</span>
+                <span className="truncate">{t(item.labelKey)}</span>
               </Link>
             );
           })}
         </nav>
 
         <Button variant="ghost" size="sm" onClick={handleSignOut} className="justify-start">
-          <LogOut className="mr-2 h-4 w-4" /> Sign out
+          <LogOut className="ms-2 h-4 w-4" /> {t("nav.signOut")}
         </Button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
         <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur md:px-8">
-          <Link to="/dashboard" className="mr-2 flex items-center gap-2 md:hidden">
+          <Link to="/dashboard" className="ms-2 flex items-center gap-2 md:hidden">
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
-              <span className="font-display text-base italic">L</span>
+              <span className="font-display text-base">מ</span>
             </div>
           </Link>
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2 text-left text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted"
+            className="flex flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2 text-start text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted"
           >
             <Search className="h-4 w-4 shrink-0" />
-            <span className="truncate">Search everything…</span>
-            <kbd className="ml-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium sm:inline-block">
+            <span className="truncate">{t("label.searchAll")}</span>
+            <kbd className="ms-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium sm:inline-block">
               ⌘K
             </kbd>
           </button>
           <Button onClick={() => setQuickOpen(true)} size="sm" className="gap-1.5 shrink-0">
-            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">Add</span>
+            <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("action.add")}</span>
           </Button>
         </header>
 
@@ -126,7 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 )}
               >
                 <Icon className="h-5 w-5" />
-                <span>{item.label}</span>
+                <span>{t(item.labelKey)}</span>
               </Link>
             );
           })}

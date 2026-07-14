@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { createTask } from "@/lib/tasks.functions";
 import { createArchiveItem } from "@/lib/archive.functions";
 import { toast } from "sonner";
+import { t } from "@/lib/i18n";
 
 export function QuickAddDialog({
   open,
@@ -58,18 +59,18 @@ export function QuickAddDialog({
       }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Task added");
+      toast.success(t("quick.taskAdded"));
       reset();
       onOpenChange(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
   });
 
   const capMut = useMutation({
     mutationFn: () =>
       createArchiveItem({
         data: {
-          title: capTitle || (capUrl ? capUrl : "Untitled"),
+          title: capTitle || (capUrl ? capUrl : capNotes.slice(0, 60) || "ללא כותרת"),
           notes: capNotes || null,
           url: capUrl || null,
           item_type: capUrl ? "link" : "note",
@@ -79,81 +80,74 @@ export function QuickAddDialog({
       }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Saved to archive");
+      toast.success(t("archive.saved"));
       reset();
       onOpenChange(false);
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
   });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle className="font-display text-2xl">Quick add</DialogTitle>
+          <DialogTitle className="font-display text-2xl">{t("quick.title")}</DialogTitle>
         </DialogHeader>
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="task">Task</TabsTrigger>
-            <TabsTrigger value="capture">Capture</TabsTrigger>
+            <TabsTrigger value="task">{t("quick.tab.task")}</TabsTrigger>
+            <TabsTrigger value="capture">{t("quick.tab.capture")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="task" className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>Title</Label>
-              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="What needs doing?" autoFocus />
+              <Label>{t("label.title")}</Label>
+              <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder={t("tasks.titlePlaceholder")} autoFocus />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div className="space-y-2">
-                <Label>Priority</Label>
+                <Label>{t("label.priority")}</Label>
                 <Select value={priority} onValueChange={(v) => setPriority(v as any)}>
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="high">High</SelectItem>
-                    <SelectItem value="medium">Medium</SelectItem>
-                    <SelectItem value="low">Low</SelectItem>
+                    <SelectItem value="high">{t("priority.high")}</SelectItem>
+                    <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+                    <SelectItem value="low">{t("priority.low")}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
-                <Label>Due date</Label>
+                <Label>{t("label.dueDate")}</Label>
                 <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
               </div>
             </div>
             <DialogFooter>
-              <Button variant="ghost" onClick={() => navigate({ to: "/tasks" })}>
-                All tasks
-              </Button>
+              <Button variant="ghost" onClick={() => navigate({ to: "/tasks" })}>{t("action.cancel")}</Button>
               <Button onClick={() => taskMut.mutate()} disabled={!title || taskMut.isPending}>
-                Add task
+                {t("action.save")}
               </Button>
             </DialogFooter>
           </TabsContent>
 
           <TabsContent value="capture" className="space-y-4 pt-4">
             <div className="space-y-2">
-              <Label>Title</Label>
-              <Input value={capTitle} onChange={(e) => setCapTitle(e.target.value)} placeholder="Optional title" autoFocus />
+              <Label>{t("label.title")}</Label>
+              <Input value={capTitle} onChange={(e) => setCapTitle(e.target.value)} placeholder={t("label.titleOptional")} />
             </div>
             <div className="space-y-2">
-              <Label>Link (optional)</Label>
-              <Input value={capUrl} onChange={(e) => setCapUrl(e.target.value)} placeholder="https://…" />
+              <Label>{t("label.url")}</Label>
+              <Input value={capUrl} onChange={(e) => setCapUrl(e.target.value)} placeholder={t("archive.urlPlaceholder")} />
             </div>
             <div className="space-y-2">
-              <Label>Notes</Label>
-              <Textarea value={capNotes} onChange={(e) => setCapNotes(e.target.value)} rows={4} placeholder="Anything you want to remember…" />
+              <Label>{t("label.notes")}</Label>
+              <Textarea value={capNotes} onChange={(e) => setCapNotes(e.target.value)} rows={4} placeholder={t("archive.notePlaceholder")} />
             </div>
             <DialogFooter>
-              <Button variant="ghost" onClick={() => navigate({ to: "/archive/new" })}>
-                More options
-              </Button>
-              <Button
-                onClick={() => capMut.mutate()}
-                disabled={(!capTitle && !capUrl && !capNotes) || capMut.isPending}
-              >
-                Save
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("action.cancel")}</Button>
+              <Button onClick={() => capMut.mutate()} disabled={(!capTitle && !capUrl && !capNotes) || capMut.isPending}>
+                {t("action.save")}
               </Button>
             </DialogFooter>
           </TabsContent>

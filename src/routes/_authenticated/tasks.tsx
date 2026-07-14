@@ -16,6 +16,7 @@ import { TagInput } from "@/components/tag-input";
 import { Circle, CheckSquare, Plus, Trash2, Pencil, Search, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { t, formatDayMonth } from "@/lib/i18n";
 
 const tasksQuery = queryOptions({
   queryKey: ["tasks"],
@@ -49,11 +50,11 @@ function TasksPage() {
   const [editing, setEditing] = useState<TaskDraft | null>(null);
 
   const filtered = useMemo(() => {
-    return tasks.filter((t: any) => {
-      if (tab === "active" && t.status !== "active") return false;
-      if (tab === "completed" && t.status !== "completed") return false;
-      if (priorityFilter !== "all" && t.priority !== priorityFilter) return false;
-      if (search && !`${t.title} ${t.description ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
+    return tasks.filter((task: any) => {
+      if (tab === "active" && task.status !== "active") return false;
+      if (tab === "completed" && task.status !== "completed") return false;
+      if (priorityFilter !== "all" && task.priority !== priorityFilter) return false;
+      if (search && !`${task.title} ${task.description ?? ""}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
   }, [tasks, tab, search, priorityFilter]);
@@ -74,9 +75,9 @@ function TasksPage() {
     onSuccess: () => {
       qc.invalidateQueries();
       setEditing(null);
-      toast.success("Saved");
+      toast.success(t("action.saved"));
     },
-    onError: (e) => toast.error(e instanceof Error ? e.message : "Failed"),
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
   });
 
   const toggleMut = useMutation({
@@ -88,18 +89,18 @@ function TasksPage() {
     mutationFn: (id: string) => deleteTask({ data: { id } }),
     onSuccess: () => {
       qc.invalidateQueries();
-      toast.success("Deleted");
+      toast.success(t("action.deleted"));
     },
   });
 
   return (
     <div className="mx-auto max-w-4xl">
       <PageHeader
-        title="Tasks"
-        description="What needs your attention."
+        title={t("tasks.title")}
+        description={t("tasks.subtitle")}
         action={
           <Button onClick={() => setEditing({ ...emptyDraft })}>
-            <Plus className="mr-1.5 h-4 w-4" /> New task
+            <Plus className="ms-1.5 h-4 w-4" /> {t("tasks.new")}
           </Button>
         }
       />
@@ -107,23 +108,23 @@ function TasksPage() {
       <div className="mb-4 flex flex-wrap items-center gap-2">
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-auto">
           <TabsList>
-            <TabsTrigger value="active">Active</TabsTrigger>
-            <TabsTrigger value="completed">Completed</TabsTrigger>
+            <TabsTrigger value="active">{t("status.active")}</TabsTrigger>
+            <TabsTrigger value="completed">{t("status.completed")}</TabsTrigger>
           </TabsList>
         </Tabs>
         <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search…" className="pl-8" />
+          <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("tasks.searchPlaceholder")} className="pe-8" />
         </div>
         <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-[130px]">
+          <SelectTrigger className="w-[140px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all">All priorities</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="low">Low</SelectItem>
+            <SelectItem value="all">{t("filter.allPriorities")}</SelectItem>
+            <SelectItem value="high">{t("priority.high")}</SelectItem>
+            <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+            <SelectItem value="low">{t("priority.low")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -131,33 +132,33 @@ function TasksPage() {
       {filtered.length === 0 ? (
         <EmptyState
           icon={<CheckCircle2 className="h-5 w-5" />}
-          title={tab === "active" ? "No active tasks" : "Nothing here yet"}
-          description={tab === "active" ? "Add your first one — it takes a second." : "Completed tasks appear here."}
-          action={tab === "active" && <Button onClick={() => setEditing({ ...emptyDraft })}>Add task</Button>}
+          title={tab === "active" ? t("tasks.emptyActive") : t("tasks.emptyDone")}
+          description={tab === "active" ? t("tasks.emptyActiveHint") : t("tasks.emptyDoneHint")}
+          action={tab === "active" && <Button onClick={() => setEditing({ ...emptyDraft })}>{t("tasks.add")}</Button>}
         />
       ) : (
         <Card className="divide-y overflow-hidden">
-          {filtered.map((t: any) => (
-            <div key={t.id} className="group flex items-center gap-3 px-4 py-3 hover:bg-muted/50">
+          {filtered.map((task: any) => (
+            <div key={task.id} className="group flex items-center gap-3 px-4 py-3 hover:bg-muted/50">
               <button
-                onClick={() => toggleMut.mutate({ id: t.id, status: t.status === "completed" ? "active" : "completed" })}
+                onClick={() => toggleMut.mutate({ id: task.id, status: task.status === "completed" ? "active" : "completed" })}
                 className="text-muted-foreground hover:text-primary"
               >
-                {t.status === "completed" ? <CheckSquare className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5" />}
+                {task.status === "completed" ? <CheckSquare className="h-5 w-5 text-primary" /> : <Circle className="h-5 w-5" />}
               </button>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className={cn("truncate font-medium", t.status === "completed" && "line-through opacity-60")}>{t.title}</p>
-                  <PriorityBadge priority={t.priority} />
+                  <p className={cn("truncate font-medium", task.status === "completed" && "line-through opacity-60")}>{task.title}</p>
+                  <PriorityBadge priority={task.priority} />
                 </div>
                 <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                  {t.due_date && (
+                  {task.due_date && (
                     <span>
-                      Due {new Date(t.due_date).toLocaleDateString(undefined, { month: "short", day: "numeric" })}
-                      {t.due_time && ` · ${t.due_time.slice(0, 5)}`}
+                      {t("tasks.due")} {formatDayMonth(task.due_date)}
+                      {task.due_time && ` · ${task.due_time.slice(0, 5)}`}
                     </span>
                   )}
-                  {t.tags?.map((tag: string) => <span key={tag}>#{tag}</span>)}
+                  {task.tags?.map((tag: string) => <span key={tag}>#{tag}</span>)}
                 </div>
               </div>
               <div className="flex opacity-0 group-hover:opacity-100">
@@ -166,19 +167,19 @@ function TasksPage() {
                   variant="ghost"
                   onClick={() =>
                     setEditing({
-                      id: t.id,
-                      title: t.title,
-                      description: t.description ?? "",
-                      priority: t.priority,
-                      due_date: t.due_date ?? "",
-                      due_time: t.due_time ?? "",
-                      tags: t.tags ?? [],
+                      id: task.id,
+                      title: task.title,
+                      description: task.description ?? "",
+                      priority: task.priority,
+                      due_date: task.due_date ?? "",
+                      due_time: task.due_time ?? "",
+                      tags: task.tags ?? [],
                     })
                   }
                 >
                   <Pencil className="h-4 w-4" />
                 </Button>
-                <Button size="icon" variant="ghost" onClick={() => confirm("Delete this task?") && deleteMut.mutate(t.id)}>
+                <Button size="icon" variant="ghost" onClick={() => confirm(t("tasks.confirmDelete")) && deleteMut.mutate(task.id)}>
                   <Trash2 className="h-4 w-4" />
                 </Button>
               </div>
@@ -190,47 +191,47 @@ function TasksPage() {
       <Dialog open={!!editing} onOpenChange={(v) => !v && setEditing(null)}>
         <DialogContent className="max-w-lg">
           <DialogHeader>
-            <DialogTitle className="font-display text-2xl">{editing?.id ? "Edit task" : "New task"}</DialogTitle>
+            <DialogTitle className="font-display text-2xl">{editing?.id ? t("tasks.edit") : t("tasks.new")}</DialogTitle>
           </DialogHeader>
           {editing && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Title</Label>
+                <Label>{t("label.title")}</Label>
                 <Input value={editing.title} onChange={(e) => setEditing({ ...editing, title: e.target.value })} autoFocus />
               </div>
               <div className="space-y-2">
-                <Label>Description</Label>
+                <Label>{t("label.description")}</Label>
                 <Textarea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} rows={3} />
               </div>
               <div className="grid grid-cols-3 gap-3">
                 <div className="space-y-2">
-                  <Label>Priority</Label>
+                  <Label>{t("label.priority")}</Label>
                   <Select value={editing.priority} onValueChange={(v) => setEditing({ ...editing, priority: v as any })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="high">High</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="low">Low</SelectItem>
+                      <SelectItem value="high">{t("priority.high")}</SelectItem>
+                      <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+                      <SelectItem value="low">{t("priority.low")}</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label>Due date</Label>
+                  <Label>{t("label.dueDate")}</Label>
                   <Input type="date" value={editing.due_date} onChange={(e) => setEditing({ ...editing, due_date: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                  <Label>Time</Label>
+                  <Label>{t("label.time")}</Label>
                   <Input type="time" value={editing.due_time} onChange={(e) => setEditing({ ...editing, due_time: e.target.value })} />
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>Tags</Label>
+                <Label>{t("label.tags")}</Label>
                 <TagInput value={editing.tags} onChange={(v) => setEditing({ ...editing, tags: v })} />
               </div>
               <DialogFooter>
-                <Button variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
+                <Button variant="ghost" onClick={() => setEditing(null)}>{t("action.cancel")}</Button>
                 <Button onClick={() => saveMut.mutate(editing)} disabled={!editing.title || saveMut.isPending}>
-                  Save
+                  {t("action.save")}
                 </Button>
               </DialogFooter>
             </div>

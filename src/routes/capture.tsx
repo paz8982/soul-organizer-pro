@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, useSearch } from "@tanstack/react-router"
 import { useEffect } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
+import { t } from "@/lib/i18n";
 
 // Public share-target landing route. Preserves query params through auth,
 // then forwards to the authenticated Save-to-Archive form.
@@ -37,7 +38,7 @@ function CapturePage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background">
-      <p className="text-sm text-muted-foreground">Opening capture…</p>
+      <p className="text-sm text-muted-foreground">{t("capture.opening")}</p>
     </div>
   );
 }

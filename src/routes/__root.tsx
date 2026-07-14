@@ -12,22 +12,21 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
+import { t } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
         <h1 className="font-display text-7xl text-primary">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          This page doesn't exist or has moved.
-        </p>
+        <h2 className="mt-4 text-xl font-semibold text-foreground">{t("error.notFound")}</h2>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.notFoundHint")}</p>
         <div className="mt-6">
           <a
             href="/"
             className="inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
           >
-            Go home
+            {t("action.goHome")}
           </a>
         </div>
       </div>
@@ -45,10 +44,8 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4">
       <div className="max-w-md text-center">
-        <h1 className="font-display text-2xl text-foreground">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Try again, or head back home.
-        </p>
+        <h1 className="font-display text-2xl text-foreground">{t("error.somethingWrong")}</h1>
+        <p className="mt-2 text-sm text-muted-foreground">{t("error.tryAgainOrHome")}</p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
             onClick={() => {
@@ -57,13 +54,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
             }}
             className="rounded-lg bg-primary px-4 py-2 text-sm font-medium text-primary-foreground"
           >
-            Try again
+            {t("action.tryAgain")}
           </button>
           <a
             href="/"
             className="rounded-lg border border-input bg-background px-4 py-2 text-sm font-medium"
           >
-            Go home
+            {t("action.goHome")}
           </a>
         </div>
       </div>
@@ -77,11 +74,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
       { name: "theme-color", content: "#6B5B95" },
-      { title: "Personal Life OS" },
-      { name: "description", content: "One calm place to manage tasks, journal, and your personal archive." },
-      { property: "og:title", content: "Personal Life OS" },
-      { property: "og:description", content: "One calm place to manage tasks, journal, and your personal archive." },
+      { title: "המוח השני — מרחב אישי אחד לכל מה שחשוב" },
+      { name: "description", content: "המוח השני שלך: משימות, יומן וארכיון אישי במקום שקט אחד." },
+      { property: "og:title", content: "המוח השני" },
+      { property: "og:description", content: "מרחב אישי אחד למשימות, יומן וארכיון." },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "he_IL" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
     links: [
@@ -93,7 +91,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@400;500;700&family=Heebo:wght@300;400;500;600;700&display=swap",
       },
     ],
   }),
@@ -105,7 +103,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en">
+    <html lang="he" dir="rtl">
       <head>
         <HeadContent />
       </head>
@@ -133,7 +131,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <Outlet />
-      <Toaster position="top-center" richColors closeButton />
+      <Toaster position="top-center" richColors closeButton dir="rtl" />
     </QueryClientProvider>
   );
 }
