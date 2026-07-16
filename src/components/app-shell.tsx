@@ -10,6 +10,7 @@ import {
   Search,
   Plus,
   LogOut,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/global-search";
 import { QuickAddDialog } from "@/components/quick-add-dialog";
+import { VoiceCommandDialog } from "@/components/voice-command-dialog";
 import { t } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/language-toggle";
 
