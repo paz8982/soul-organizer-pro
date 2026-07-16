@@ -10,6 +10,7 @@ import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { t } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/language-toggle";
 
 export const Route = createFileRoute("/auth")({
   validateSearch: z.object({ next: z.string().optional() }),
@@ -77,7 +78,10 @@ function AuthPage() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
+    <div className="relative flex min-h-screen items-center justify-center bg-background px-4 py-12">
+      <div className="absolute end-4 top-4">
+        <LanguageToggle />
+      </div>
       <div className="w-full max-w-md">
         <div className="mb-8 text-center">
           <h1 className="font-display text-4xl text-primary">{t("app.name")}</h1>
