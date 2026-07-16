@@ -276,6 +276,7 @@ const he: Dict = {
   "quick.taskAdded": "המשימה נוספה",
 
   "lang.toggle": "החלף שפה",
+  "voice.button": "עוזר קולי",
 };
 
 const en: Dict = {
@@ -488,6 +489,7 @@ const en: Dict = {
   "quick.taskAdded": "Task added",
 
   "lang.toggle": "Switch language",
+  "voice.button": "Voice assistant",
 };
 
 const dicts: Record<Locale, Dict> = { he, en };

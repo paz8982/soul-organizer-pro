@@ -10,6 +10,7 @@ import {
   Search,
   Plus,
   LogOut,
+  Mic,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -17,6 +18,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/global-search";
 import { QuickAddDialog } from "@/components/quick-add-dialog";
+import { VoiceCommandDialog } from "@/components/voice-command-dialog";
 import { t } from "@/lib/i18n";
 import { LanguageToggle } from "@/components/language-toggle";
 
@@ -34,6 +36,7 @@ const NAV: NavItem[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const router = useRouter();
@@ -109,6 +112,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Button onClick={() => setQuickOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("action.add")}</span>
           </Button>
+          <Button
+            onClick={() => setVoiceOpen(true)}
+            size="sm"
+            variant="secondary"
+            className="gap-1.5 shrink-0"
+            aria-label={t("voice.button")}
+            title={t("voice.button")}
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
           <LanguageToggle className="shrink-0" />
         </header>
 
@@ -138,6 +151,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       <QuickAddDialog open={quickOpen} onOpenChange={setQuickOpen} />
+      <VoiceCommandDialog open={voiceOpen} onOpenChange={setVoiceOpen} />
     </div>
   );
 }
