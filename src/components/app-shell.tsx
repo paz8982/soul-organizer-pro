@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { GlobalSearch } from "@/components/global-search";
 import { QuickAddDialog } from "@/components/quick-add-dialog";
 import { t } from "@/lib/i18n";
+import { LanguageToggle } from "@/components/language-toggle";
 
 type NavItem = { to: string; labelKey: string; icon: typeof LayoutDashboard };
 
@@ -108,6 +109,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Button onClick={() => setQuickOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("action.add")}</span>
           </Button>
+          <LanguageToggle className="shrink-0" />
         </header>
 
         <main className="flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-8">{children}</main>

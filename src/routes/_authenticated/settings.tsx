@@ -10,8 +10,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import { LogOut, Download, Moon } from "lucide-react";
-import { t } from "@/lib/i18n";
+import { LogOut, Download, Moon, Languages } from "lucide-react";
+import { t, useLocale, setLocale, type Locale } from "@/lib/i18n";
 
 const profileQuery = queryOptions({
   queryKey: ["profile"],
@@ -95,15 +95,18 @@ function SettingsPage() {
 
         <Card className="p-6">
           <h2 className="mb-4 font-display text-xl">{t("settings.appearance")}</h2>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Moon className="h-4 w-4 text-muted-foreground" />
-              <div>
-                <p className="font-medium">{t("settings.darkMode")}</p>
-                <p className="text-xs text-muted-foreground">{t("settings.darkModeHint")}</p>
+          <div className="space-y-5">
+            <LanguageRow />
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Moon className="h-4 w-4 text-muted-foreground" />
+                <div>
+                  <p className="font-medium">{t("settings.darkMode")}</p>
+                  <p className="text-xs text-muted-foreground">{t("settings.darkModeHint")}</p>
+                </div>
               </div>
+              <Switch checked={dark} onCheckedChange={applyTheme} />
             </div>
-            <Switch checked={dark} onCheckedChange={applyTheme} />
           </div>
         </Card>
 
@@ -134,6 +137,47 @@ function SettingsPage() {
             </Button>
           </div>
         </Card>
+      </div>
+    </div>
+  );
+}
+
+function LanguageRow() {
+  const locale = useLocale();
+  const choose = (l: Locale) => {
+    if (l === locale) return;
+    setLocale(l);
+    toast.success(t("settings.languageChanged"));
+  };
+  const options: { value: Locale; label: string }[] = [
+    { value: "he", label: t("settings.language.he") },
+    { value: "en", label: t("settings.language.en") },
+  ];
+  return (
+    <div className="flex items-center justify-between gap-4">
+      <div className="flex items-center gap-3">
+        <Languages className="h-4 w-4 text-muted-foreground" />
+        <div>
+          <p className="font-medium">{t("settings.language")}</p>
+          <p className="text-xs text-muted-foreground">{t("settings.languageHint")}</p>
+        </div>
+      </div>
+      <div className="inline-flex rounded-lg border bg-background p-0.5">
+        {options.map((o) => (
+          <button
+            key={o.value}
+            type="button"
+            onClick={() => choose(o.value)}
+            className={
+              "rounded-md px-3 py-1.5 text-xs font-medium transition-colors " +
+              (locale === o.value
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground")
+            }
+          >
+            {o.label}
+          </button>
+        ))}
       </div>
     </div>
   );
