@@ -104,6 +104,81 @@ export type Database = {
         }
         Relationships: []
       }
+      learning_categories: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      learning_items: {
+        Row: {
+          category: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          duration_minutes: number | null
+          format: Database["public"]["Enums"]["learning_format"]
+          id: string
+          reflection: string | null
+          source: string | null
+          status: Database["public"]["Enums"]["learning_status"]
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          format?: Database["public"]["Enums"]["learning_format"]
+          id?: string
+          reflection?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["learning_status"]
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          category?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          duration_minutes?: number | null
+          format?: Database["public"]["Enums"]["learning_format"]
+          id?: string
+          reflection?: string | null
+          source?: string | null
+          status?: Database["public"]["Enums"]["learning_status"]
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -188,6 +263,8 @@ export type Database = {
     }
     Enums: {
       archive_item_type: "file" | "link" | "note" | "image" | "pdf" | "doc"
+      learning_format: "video" | "audio" | "text"
+      learning_status: "recommended" | "saved" | "completed" | "skipped"
       task_priority: "high" | "medium" | "low"
       task_status: "active" | "completed"
     }
@@ -318,6 +395,8 @@ export const Constants = {
   public: {
     Enums: {
       archive_item_type: ["file", "link", "note", "image", "pdf", "doc"],
+      learning_format: ["video", "audio", "text"],
+      learning_status: ["recommended", "saved", "completed", "skipped"],
       task_priority: ["high", "medium", "low"],
       task_status: ["active", "completed"],
     },
