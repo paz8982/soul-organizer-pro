@@ -276,6 +276,7 @@ const he: Dict = {
   "quick.taskAdded": "המשימה נוספה",
 
   "lang.toggle": "החלף שפה",
+  "voice.button": "עוזר קולי",
 };
 
 const en: Dict = {
