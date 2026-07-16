@@ -173,7 +173,7 @@ export function VoiceCommandDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="w-[calc(100vw-2rem)] max-w-md">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl">
             {locale === "he" ? "עוזר קולי" : "Voice assistant"}
