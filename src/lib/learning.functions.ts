@@ -1,0 +1,221 @@
+import { createServerFn } from "@tanstack/react-start";
+import { z } from "zod";
+import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const GATEWAY = "https://ai.gateway.lovable.dev/v1";
+const client = (ctx: { supabase: unknown }) => ctx.supabase as any;
+
+const formatEnum = z.enum(["video", "audio", "text"]);
+const statusEnum = z.enum(["recommended", "saved", "completed", "skipped"]);
+
+export type LearningFormat = z.infer<typeof formatEnum>;
+export type LearningStatus = z.infer<typeof statusEnum>;
+
+export type Recommendation = {
+  title: string;
+  description: string;
+  url: string;
+  source: string;
+  format: LearningFormat;
+  duration_minutes: number;
+  category: string;
+  thumbnail_url?: string | null;
+};
+
+// ---------- Categories ----------
+export const listLearningCategories = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await client(context)
+      .from("learning_categories")
+      .select("*")
+      .order("created_at", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const addLearningCategory = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ name: z.string().min(1).max(50) }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await client(context)
+      .from("learning_categories")
+      .insert({ name: data.name.trim(), user_id: context.userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+// ---------- Items ----------
+const itemInput = z.object({
+  title: z.string().min(1),
+  description: z.string().nullable().optional(),
+  url: z.string().url(),
+  source: z.string().nullable().optional(),
+  format: formatEnum,
+  duration_minutes: z.number().int().positive().nullable().optional(),
+  category: z.string().nullable().optional(),
+  thumbnail_url: z.string().nullable().optional(),
+  status: statusEnum.default("saved"),
+});
+
+export const listLearningItems = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z.object({ status: statusEnum.optional() }).parse(data ?? {}),
+  )
+  .handler(async ({ data, context }) => {
+    let q = client(context).from("learning_items").select("*").order("created_at", { ascending: false });
+    if (data.status) q = q.eq("status", data.status);
+    const { data: rows, error } = await q;
+    if (error) throw new Error(error.message);
+    return rows ?? [];
+  });
+
+export const saveLearningItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => itemInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await client(context)
+      .from("learning_items")
+      .insert({ ...data, user_id: context.userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const updateLearningItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) =>
+    z
+      .object({
+        id: z.string().uuid(),
+        patch: z
+          .object({
+            status: statusEnum.optional(),
+            reflection: z.string().nullable().optional(),
+            completed_at: z.string().nullable().optional(),
+          })
+          .partial(),
+      })
+      .parse(data),
+  )
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await client(context)
+      .from("learning_items")
+      .update(data.patch)
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const deleteLearningItem = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    const { error } = await client(context).from("learning_items").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// ---------- Recommendations (AI) ----------
+const recommendInput = z.object({
+  duration_minutes: z.number().int().positive(),
+  format: formatEnum,
+  category: z.string().min(1),
+  locale: z.enum(["he", "en"]),
+});
+
+export const recommendLearning = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => recommendInput.parse(data))
+  .handler(async ({ data }): Promise<{ items: Recommendation[] }> => {
+    const apiKey = process.env.LOVABLE_API_KEY;
+    if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+
+    const sys =
+      data.locale === "he"
+        ? `אתה עוזר שממליץ על תכנים איכותיים ללמידה קצרה. החזר 3 המלצות שונות ואמיתיות ככל האפשר.
+- format: ${data.format} (video=YouTube/TED, audio=Podcast/Spotify, text=article/blog)
+- קטגוריה: ${data.category}
+- משך: כ-${data.duration_minutes} דקות (התאם).
+כל המלצה: כותרת ותיאור קצר בעברית טבעית, מקור אמין (TED / YouTube / Spotify / Medium / HBR וכו'), URL שעובד אם ידוע לך (אחרת קישור חיפוש רלוונטי ב-google/youtube), duration_minutes מספרי, category.
+החזר JSON בלבד לפי הסכימה.`
+        : `Recommend 3 diverse high-quality short-learning items.
+- format: ${data.format} (video=YouTube/TED, audio=Podcast/Spotify, text=article/blog)
+- category: ${data.category}
+- duration: about ${data.duration_minutes} minutes.
+Each item: concise title & description, credible source, working URL if you know one (otherwise a relevant search URL on youtube/google), numeric duration_minutes, category.
+Return JSON only per schema.`;
+
+    const res = await fetch(`${GATEWAY}/chat/completions`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          { role: "system", content: sys },
+          { role: "user", content: `format=${data.format}, category=${data.category}, minutes=${data.duration_minutes}` },
+        ],
+        response_format: {
+          type: "json_schema",
+          json_schema: {
+            name: "recommendations",
+            strict: true,
+            schema: {
+              type: "object",
+              additionalProperties: false,
+              properties: {
+                items: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    additionalProperties: false,
+                    properties: {
+                      title: { type: "string" },
+                      description: { type: "string" },
+                      url: { type: "string" },
+                      source: { type: "string" },
+                      format: { type: "string", enum: ["video", "audio", "text"] },
+                      duration_minutes: { type: "number" },
+                      category: { type: "string" },
+                      thumbnail_url: { type: ["string", "null"] },
+                    },
+                    required: [
+                      "title",
+                      "description",
+                      "url",
+                      "source",
+                      "format",
+                      "duration_minutes",
+                      "category",
+                      "thumbnail_url",
+                    ],
+                  },
+                },
+              },
+              required: ["items"],
+            },
+          },
+        },
+      }),
+    });
+
+    if (!res.ok) {
+      const txt = await res.text().catch(() => "");
+      throw new Error(`Recommendation failed [${res.status}]: ${txt}`);
+    }
+    const json = (await res.json()) as { choices?: Array<{ message?: { content?: string } }> };
+    const raw = json.choices?.[0]?.message?.content ?? '{"items":[]}';
+    let parsed: { items: Recommendation[] } = { items: [] };
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      parsed = { items: [] };
+    }
+    return { items: (parsed.items ?? []).slice(0, 5) };
+  });
