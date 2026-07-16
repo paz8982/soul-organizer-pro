@@ -12,7 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { t, useLocale, hydrateLocale, dirFor } from "@/lib/i18n";
+import { t } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
@@ -76,11 +76,15 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "theme-color", content: "#6B5B95" },
       { title: "המוח השני — מרחב אישי אחד לכל מה שחשוב" },
       { name: "description", content: "המוח השני שלך: משימות, יומן וארכיון אישי במקום שקט אחד." },
-      { property: "og:title", content: "המוח השני" },
-      { property: "og:description", content: "מרחב אישי אחד למשימות, יומן וארכיון." },
+      { property: "og:title", content: "המוח השני — מרחב אישי אחד לכל מה שחשוב" },
+      { property: "og:description", content: "המוח השני שלך: משימות, יומן וארכיון אישי במקום שקט אחד." },
       { property: "og:type", content: "website" },
       { property: "og:locale", content: "he_IL" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "המוח השני — מרחב אישי אחד לכל מה שחשוב" },
+      { name: "twitter:description", content: "המוח השני שלך: משימות, יומן וארכיון אישי במקום שקט אחד." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/60922467-6b4b-4b99-8b0a-8346606ce092/id-preview-08a80932--b191ed76-d508-4ba1-89e7-5d53bfb31ddc.lovable.app-1784208063295.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/60922467-6b4b-4b99-8b0a-8346606ce092/id-preview-08a80932--b191ed76-d508-4ba1-89e7-5d53bfb31ddc.lovable.app-1784208063295.png" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -118,11 +122,6 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
-  const locale = useLocale();
-
-  useEffect(() => {
-    hydrateLocale();
-  }, []);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
@@ -135,11 +134,8 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Key by locale so the tree remounts and every t() call re-evaluates. */}
-      <div key={locale} dir={dirFor(locale)} lang={locale} className="contents">
-        <Outlet />
-      </div>
-      <Toaster position="top-center" richColors closeButton dir={dirFor(locale)} />
+      <Outlet />
+      <Toaster position="top-center" richColors closeButton dir="rtl" />
     </QueryClientProvider>
   );
 }
