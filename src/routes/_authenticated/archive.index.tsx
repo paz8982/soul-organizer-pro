@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { listArchive } from "@/lib/archive.functions";
 import { PageHeader, EmptyState } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
@@ -16,6 +16,9 @@ const archiveQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/archive/")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    q: typeof search.q === "string" ? search.q : undefined,
+  }),
   loader: ({ context }) => context.queryClient.ensureQueryData(archiveQuery),
   component: ArchivePage,
 });
@@ -30,9 +33,14 @@ const iconFor = (type: string) => {
 
 function ArchivePage() {
   const { data: items } = useSuspenseQuery(archiveQuery);
-  const [search, setSearch] = useState("");
+  const { q } = Route.useSearch();
+  const [search, setSearch] = useState(q ?? "");
   const [type, setType] = useState("all");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (q !== undefined) setSearch(q);
+  }, [q]);
 
   const filtered = items.filter((i: any) => {
     if (type !== "all" && i.item_type !== type) return false;
