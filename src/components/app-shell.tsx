@@ -93,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex items-center gap-1.5 border-b bg-background/80 px-3 py-3 backdrop-blur md:gap-2 md:px-8">
           <Link to="/dashboard" className="ms-2 flex items-center gap-2 md:hidden">
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
               <span className="font-display text-base">מ</span>
@@ -101,10 +101,10 @@ export function AppShell({ children }: { children: ReactNode }) {
           </Link>
           <button
             onClick={() => setSearchOpen(true)}
-            className="flex flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2 text-start text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted"
+            className="flex min-w-0 flex-1 items-center gap-2 rounded-full border bg-card px-4 py-2 text-start text-sm text-muted-foreground shadow-sm transition-colors hover:bg-muted"
           >
             <Search className="h-4 w-4 shrink-0" />
-            <span className="truncate">{t("label.searchAll")}</span>
+            <span className="min-w-0 flex-1 truncate">{t("label.searchAll")}</span>
             <kbd className="ms-auto hidden rounded border bg-background px-1.5 py-0.5 text-[10px] font-medium sm:inline-block">
               ⌘K
             </kbd>
