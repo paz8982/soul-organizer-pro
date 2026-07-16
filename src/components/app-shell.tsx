@@ -112,6 +112,16 @@ export function AppShell({ children }: { children: ReactNode }) {
           <Button onClick={() => setQuickOpen(true)} size="sm" className="gap-1.5 shrink-0">
             <Plus className="h-4 w-4" /> <span className="hidden sm:inline">{t("action.add")}</span>
           </Button>
+          <Button
+            onClick={() => setVoiceOpen(true)}
+            size="sm"
+            variant="secondary"
+            className="gap-1.5 shrink-0"
+            aria-label={t("voice.button")}
+            title={t("voice.button")}
+          >
+            <Mic className="h-4 w-4" />
+          </Button>
           <LanguageToggle className="shrink-0" />
         </header>
 
