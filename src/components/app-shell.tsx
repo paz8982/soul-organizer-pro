@@ -151,6 +151,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <GlobalSearch open={searchOpen} onOpenChange={setSearchOpen} />
       <QuickAddDialog open={quickOpen} onOpenChange={setQuickOpen} />
+      <VoiceCommandDialog open={voiceOpen} onOpenChange={setVoiceOpen} />
     </div>
   );
 }
