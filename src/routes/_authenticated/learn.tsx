@@ -84,7 +84,7 @@ function LearnPage() {
   return (
     <div className="mx-auto max-w-4xl" key={locale}>
       <PageHeader title={t("learn.title")} description={t("learn.subtitle")} />
-      <Tabs defaultValue="discover" className="w-full">
+      <Tabs defaultValue="discover" className="w-full" dir={locale === "he" ? "rtl" : "ltr"}>
         <TabsList className="mb-6">
           <TabsTrigger value="discover">{t("learn.tab.discover")}</TabsTrigger>
           <TabsTrigger value="list">{t("learn.tab.list")}</TabsTrigger>
