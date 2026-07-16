@@ -1,26 +1,75 @@
-// Lightweight i18n. Hebrew is the default; the shape supports adding more
-// locales later (English/Arabic/…) without touching component call sites.
+// Lightweight i18n with runtime locale switching.
+// Hebrew is default; English is fully supported. Components that call
+// useLocale() re-render on locale change; callers of plain t() will see
+// the new value on their next render (RootComponent keys Outlet by
+// locale so the whole app remounts on switch).
+
+import { useSyncExternalStore } from "react";
 
 export type Locale = "he" | "en";
 export const DEFAULT_LOCALE: Locale = "he";
 export const RTL_LOCALES: Locale[] = ["he"];
+const STORAGE_KEY = "locale";
 
 let currentLocale: Locale = DEFAULT_LOCALE;
-export const getLocale = (): Locale => currentLocale;
-export const setLocale = (l: Locale) => {
-  currentLocale = l;
-};
-export const isRTL = (l: Locale = currentLocale) => RTL_LOCALES.includes(l);
+const listeners = new Set<() => void>();
 
-// Central dictionary. Keys are namespaced with dots.
+export const getLocale = (): Locale => currentLocale;
+export const isRTL = (l: Locale = currentLocale) => RTL_LOCALES.includes(l);
+export const dirFor = (l: Locale = currentLocale) => (isRTL(l) ? "rtl" : "ltr");
+
+export function setLocale(l: Locale) {
+  if (l === currentLocale) return;
+  currentLocale = l;
+  if (typeof window !== "undefined") {
+    try {
+      localStorage.setItem(STORAGE_KEY, l);
+    } catch {
+      /* ignore */
+    }
+    document.documentElement.lang = l;
+    document.documentElement.dir = dirFor(l);
+  }
+  listeners.forEach((fn) => fn());
+}
+
+/** Read the persisted locale from storage and apply it. Safe to call on client mount. */
+export function hydrateLocale() {
+  if (typeof window === "undefined") return;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY) as Locale | null;
+    if (stored === "he" || stored === "en") {
+      setLocale(stored);
+      return;
+    }
+  } catch {
+    /* ignore */
+  }
+  // Ensure DOM matches default
+  document.documentElement.lang = currentLocale;
+  document.documentElement.dir = dirFor(currentLocale);
+}
+
+export function useLocale(): Locale {
+  return useSyncExternalStore(
+    (cb) => {
+      listeners.add(cb);
+      return () => {
+        listeners.delete(cb);
+      };
+    },
+    () => currentLocale,
+    () => DEFAULT_LOCALE,
+  );
+}
+
+// Central dictionary.
 type Dict = Record<string, string>;
 
 const he: Dict = {
-  // Brand
   "app.name": "המוח השני",
   "app.tagline": "מקום שקט אחד לכל מה שחשוב לך.",
 
-  // Nav
   "nav.dashboard": "דף הבית",
   "nav.tasks": "משימות",
   "nav.journal": "יומן אישי",
@@ -29,7 +78,6 @@ const he: Dict = {
   "nav.settings": "הגדרות",
   "nav.signOut": "יציאה",
 
-  // Common actions
   "action.save": "שמירה",
   "action.saveChanges": "שמירת שינויים",
   "action.cancel": "ביטול",
@@ -48,7 +96,6 @@ const he: Dict = {
   "action.failed": "הפעולה נכשלה",
   "action.confirmDelete": "למחוק את הפריט הזה?",
 
-  // Common labels
   "label.search": "חיפוש",
   "label.searchAll": "חיפוש בכל המקומות…",
   "label.title": "כותרת",
@@ -72,19 +119,16 @@ const he: Dict = {
   "label.url": "כתובת קישור",
   "label.note": "הערה",
 
-  // Statuses / filters
   "status.active": "פעילות",
   "status.completed": "הושלמו",
   "status.all": "הכול",
   "filter.allPriorities": "כל העדיפויות",
   "filter.allTypes": "כל הסוגים",
 
-  // Priority
   "priority.high": "גבוהה",
   "priority.medium": "בינונית",
   "priority.low": "נמוכה",
 
-  // Archive item types
   "type.note": "הערה",
   "type.link": "קישור",
   "type.image": "תמונה",
@@ -98,20 +142,17 @@ const he: Dict = {
   "types.docs": "מסמכים",
   "types.files": "קבצים אחרים",
 
-  // Mood labels
   "mood.1": "קשה",
   "mood.2": "נמוך",
   "mood.3": "בסדר",
   "mood.4": "טוב",
   "mood.5": "מצוין",
 
-  // Greetings
   "greeting.night": "עוד ער?",
   "greeting.morning": "בוקר טוב",
   "greeting.afternoon": "צהריים טובים",
   "greeting.evening": "ערב טוב",
 
-  // Dashboard
   "dashboard.subtitle.zero": "אין לך משימות פעילות כרגע.",
   "dashboard.subtitle.one": "יש לך משימה פעילה אחת.",
   "dashboard.subtitle.many": "יש לך {n} משימות פעילות.",
@@ -129,7 +170,6 @@ const he: Dict = {
   "dashboard.openArchive": "לארכיון ←",
   "dashboard.completeTask": "סימון כהושלם",
 
-  // Tasks
   "tasks.title": "משימות",
   "tasks.subtitle": "מה דורש את תשומת ליבך.",
   "tasks.new": "משימה חדשה",
@@ -144,7 +184,6 @@ const he: Dict = {
   "tasks.due": "לביצוע עד",
   "tasks.confirmDelete": "למחוק את המשימה הזו?",
 
-  // Journal
   "journal.title": "יומן אישי",
   "journal.subtitle": "המרחב הפרטי שלך לחשוב בו.",
   "journal.new": "רשומה חדשה",
@@ -159,7 +198,6 @@ const he: Dict = {
   "journal.confirmDelete": "למחוק את הרשומה הזו?",
   "journal.back": "חזרה ליומן",
 
-  // Archive
   "archive.title": "ארכיון",
   "archive.subtitle": "קבצים, קישורים והערות ששווה לשמור.",
   "archive.save": "שמירת פריט",
@@ -184,7 +222,6 @@ const he: Dict = {
   "archive.back": "חזרה לארכיון",
   "archive.downloadFile": "הורדת הקובץ",
 
-  // Auth
   "auth.subtitle": "מקום שקט אחד למשימות, יומן וארכיון.",
   "auth.signIn": "כניסה",
   "auth.signUp": "יצירת חשבון",
@@ -197,15 +234,18 @@ const he: Dict = {
   "auth.failed": "אימות נכשל",
   "auth.googleFailed": "כניסה עם Google נכשלה",
 
-  // Capture
   "capture.opening": "פותח את מסך הלכידה…",
 
-  // Settings
   "settings.title": "הגדרות",
   "settings.subtitle": "העדפות וחשבון.",
   "settings.account": "חשבון",
   "settings.appearance": "מראה",
   "settings.data": "נתונים",
+  "settings.language": "שפה",
+  "settings.languageHint": "בחר את שפת הממשק.",
+  "settings.language.he": "עברית",
+  "settings.language.en": "אנגלית",
+  "settings.languageChanged": "השפה שונתה",
   "settings.darkMode": "מצב כהה",
   "settings.darkModeHint": "אפלה רכה בגוון סגלגל.",
   "settings.export": "ייצוא הכול",
@@ -216,7 +256,6 @@ const he: Dict = {
   "settings.profileSaved": "הפרופיל נשמר",
   "settings.downloaded": "הורד",
 
-  // Learn
   "learn.title": "למידה והשראה",
   "learn.subtitle": "פינה שקטה לצמיחה. בקרוב.",
   "learn.headline": "משהו רגוע בדרך",
@@ -225,21 +264,233 @@ const he: Dict = {
   "learn.dailyPrompts": "פרומפטים יומיים",
   "learn.paths": "מסלולי למידה",
 
-  // Errors
   "error.notFound": "העמוד לא נמצא",
   "error.notFoundHint": "העמוד הזה לא קיים או הוסר.",
   "error.somethingWrong": "משהו השתבש",
   "error.tryAgainOrHome": "נסה שוב או חזור לדף הבית.",
   "error.noResults": "לא נמצאו תוצאות.",
 
-  // Quick add
   "quick.title": "הוספה מהירה",
   "quick.tab.task": "משימה",
   "quick.tab.capture": "לכידה",
   "quick.taskAdded": "המשימה נוספה",
+
+  "lang.toggle": "החלף שפה",
 };
 
-const dicts: Record<Locale, Dict> = { he, en: {} };
+const en: Dict = {
+  "app.name": "Second Brain",
+  "app.tagline": "One quiet place for everything that matters to you.",
+
+  "nav.dashboard": "Home",
+  "nav.tasks": "Tasks",
+  "nav.journal": "Journal",
+  "nav.archive": "Archive",
+  "nav.learn": "Inspire",
+  "nav.settings": "Settings",
+  "nav.signOut": "Sign out",
+
+  "action.save": "Save",
+  "action.saveChanges": "Save changes",
+  "action.cancel": "Cancel",
+  "action.delete": "Delete",
+  "action.edit": "Edit",
+  "action.add": "Add",
+  "action.upload": "Upload file",
+  "action.download": "Download",
+  "action.export": "Export",
+  "action.quickAdd": "Quick add",
+  "action.new": "New",
+  "action.tryAgain": "Try again",
+  "action.goHome": "Back to home",
+  "action.saved": "Saved",
+  "action.deleted": "Deleted",
+  "action.failed": "Something went wrong",
+  "action.confirmDelete": "Delete this item?",
+
+  "label.search": "Search",
+  "label.searchAll": "Search everywhere…",
+  "label.title": "Title",
+  "label.titleOptional": "Title (optional)",
+  "label.description": "Description",
+  "label.descriptionOptional": "Description (optional)",
+  "label.notes": "Notes",
+  "label.notesOptional": "Notes (optional)",
+  "label.tags": "Tags",
+  "label.tagPlaceholder": "Add a tag…",
+  "label.date": "Date",
+  "label.time": "Time",
+  "label.priority": "Priority",
+  "label.dueDate": "Due date",
+  "label.reminder": "Reminder",
+  "label.mood": "How are you feeling?",
+  "label.thoughts": "Thoughts",
+  "label.email": "Email",
+  "label.password": "Password",
+  "label.displayName": "Display name",
+  "label.url": "Link URL",
+  "label.note": "Note",
+
+  "status.active": "Active",
+  "status.completed": "Completed",
+  "status.all": "All",
+  "filter.allPriorities": "All priorities",
+  "filter.allTypes": "All types",
+
+  "priority.high": "High",
+  "priority.medium": "Medium",
+  "priority.low": "Low",
+
+  "type.note": "Note",
+  "type.link": "Link",
+  "type.image": "Image",
+  "type.pdf": "PDF",
+  "type.doc": "Document",
+  "type.file": "File",
+  "types.notes": "Notes",
+  "types.links": "Links",
+  "types.images": "Images",
+  "types.pdfs": "PDFs",
+  "types.docs": "Documents",
+  "types.files": "Other files",
+
+  "mood.1": "Rough",
+  "mood.2": "Low",
+  "mood.3": "Okay",
+  "mood.4": "Good",
+  "mood.5": "Great",
+
+  "greeting.night": "Still up?",
+  "greeting.morning": "Good morning",
+  "greeting.afternoon": "Good afternoon",
+  "greeting.evening": "Good evening",
+
+  "dashboard.subtitle.zero": "You have no active tasks.",
+  "dashboard.subtitle.one": "You have one active task.",
+  "dashboard.subtitle.many": "You have {n} active tasks.",
+  "dashboard.today": "Today",
+  "dashboard.todayEmpty": "Nothing due today. Enjoy the quiet.",
+  "dashboard.overdue": "Overdue",
+  "dashboard.upcoming": "This week",
+  "dashboard.upcomingEmpty": "Nothing scheduled.",
+  "dashboard.recentJournal": "Recent entries",
+  "dashboard.journalEmpty": "No journal entries yet.",
+  "dashboard.recentArchive": "Recently saved",
+  "dashboard.archiveEmpty": "Nothing saved yet — try quick add.",
+  "dashboard.allTasks": "All tasks →",
+  "dashboard.openJournal": "Open →",
+  "dashboard.openArchive": "To archive →",
+  "dashboard.completeTask": "Mark as done",
+
+  "tasks.title": "Tasks",
+  "tasks.subtitle": "What needs your attention.",
+  "tasks.new": "New task",
+  "tasks.edit": "Edit task",
+  "tasks.add": "Add task",
+  "tasks.emptyActive": "No active tasks",
+  "tasks.emptyDone": "No completed tasks yet",
+  "tasks.emptyActiveHint": "Add your first — it takes a second.",
+  "tasks.emptyDoneHint": "Finished tasks will show up here.",
+  "tasks.titlePlaceholder": "What needs doing?",
+  "tasks.searchPlaceholder": "Search tasks…",
+  "tasks.due": "Due",
+  "tasks.confirmDelete": "Delete this task?",
+
+  "journal.title": "Journal",
+  "journal.subtitle": "Your private space to think.",
+  "journal.new": "New entry",
+  "journal.newTitle": "New entry",
+  "journal.empty": "Your journal is waiting",
+  "journal.emptyHint": "Write your first entry — one sentence is enough.",
+  "journal.start": "Start writing",
+  "journal.searchPlaceholder": "Search entries…",
+  "journal.titleShort": "A word or two…",
+  "journal.body": "Write freely…",
+  "journal.saved": "Entry saved",
+  "journal.confirmDelete": "Delete this entry?",
+  "journal.back": "Back to journal",
+
+  "archive.title": "Archive",
+  "archive.subtitle": "Files, links and notes worth keeping.",
+  "archive.save": "Save item",
+  "archive.empty": "Nothing in the archive yet",
+  "archive.emptyHint": "Save your first item — a link, file or note.",
+  "archive.saveSomething": "Save something",
+  "archive.searchPlaceholder": "Search the archive…",
+  "archive.newTitle": "Save to archive",
+  "archive.subtitleManual": "What would you like to keep?",
+  "archive.subtitleShared": "Shared from another app.",
+  "archive.tab.file": "File",
+  "archive.tab.link": "Link",
+  "archive.tab.note": "Note",
+  "archive.pickFile": "Click to choose a file",
+  "archive.pickFileHint": "Images, PDFs, documents — all welcome.",
+  "archive.urlPlaceholder": "https://…",
+  "archive.notePlaceholder": "Anything you want to remember…",
+  "archive.pleasePickFile": "Please pick a file",
+  "archive.notSignedIn": "Not signed in",
+  "archive.saved": "Saved to archive",
+  "archive.confirmDelete": "Delete this item from the archive?",
+  "archive.back": "Back to archive",
+  "archive.downloadFile": "Download file",
+
+  "auth.subtitle": "One quiet place for tasks, journal and archive.",
+  "auth.signIn": "Sign in",
+  "auth.signUp": "Create account",
+  "auth.createAccount": "Create account",
+  "auth.newHere": "New here?",
+  "auth.haveAccount": "Already have an account?",
+  "auth.google": "Continue with Google",
+  "auth.or": "or",
+  "auth.accountCreated": "Account created. Check your email to confirm.",
+  "auth.failed": "Authentication failed",
+  "auth.googleFailed": "Google sign-in failed",
+
+  "capture.opening": "Opening capture…",
+
+  "settings.title": "Settings",
+  "settings.subtitle": "Preferences and account.",
+  "settings.account": "Account",
+  "settings.appearance": "Appearance",
+  "settings.data": "Data",
+  "settings.language": "Language",
+  "settings.languageHint": "Choose the interface language.",
+  "settings.language.he": "Hebrew",
+  "settings.language.en": "English",
+  "settings.languageChanged": "Language updated",
+  "settings.darkMode": "Dark mode",
+  "settings.darkModeHint": "Soft, lavender-tinted dark.",
+  "settings.export": "Export everything",
+  "settings.exportHint": "Download all your data as JSON.",
+  "settings.backupSoon": "Automatic cloud backup coming soon.",
+  "settings.signOut": "Sign out",
+  "settings.signOutHint": "You'll need to sign in again.",
+  "settings.profileSaved": "Profile saved",
+  "settings.downloaded": "Downloaded",
+
+  "learn.title": "Learning & inspiration",
+  "learn.subtitle": "A quiet corner for growth. Coming soon.",
+  "learn.headline": "Something calm on the way",
+  "learn.body": "Reading suggestions, learning paths and inspiration prompts — matched to your pace, not disrupting it.",
+  "learn.readingList": "Reading list",
+  "learn.dailyPrompts": "Daily prompts",
+  "learn.paths": "Learning paths",
+
+  "error.notFound": "Page not found",
+  "error.notFoundHint": "This page doesn't exist or was removed.",
+  "error.somethingWrong": "Something went wrong",
+  "error.tryAgainOrHome": "Try again or head back home.",
+  "error.noResults": "No results found.",
+
+  "quick.title": "Quick add",
+  "quick.tab.task": "Task",
+  "quick.tab.capture": "Capture",
+  "quick.taskAdded": "Task added",
+
+  "lang.toggle": "Switch language",
+};
+
+const dicts: Record<Locale, Dict> = { he, en };
 
 export function t(key: string, vars?: Record<string, string | number>): string {
   const raw = dicts[currentLocale]?.[key] ?? dicts.he[key] ?? key;
@@ -247,7 +498,6 @@ export function t(key: string, vars?: Record<string, string | number>): string {
   return raw.replace(/\{(\w+)\}/g, (_, k) => String(vars[k] ?? ""));
 }
 
-// Formatters — Hebrew / Israeli defaults.
 const localeTag = (l: Locale) => (l === "he" ? "he-IL" : "en-US");
 
 export const formatDate = (date: string | Date, opts?: Intl.DateTimeFormatOptions) =>
