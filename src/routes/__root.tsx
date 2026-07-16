@@ -12,7 +12,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { supabase } from "@/integrations/supabase/client";
 import { Toaster } from "@/components/ui/sonner";
-import { t } from "@/lib/i18n";
+import { t, useLocale, dirFor } from "@/lib/i18n";
 
 function NotFoundComponent() {
   return (
@@ -122,6 +122,8 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
   const router = useRouter();
+  const locale = useLocale();
+  const dir = dirFor(locale);
 
   useEffect(() => {
     const { data } = supabase.auth.onAuthStateChange((event) => {
@@ -134,8 +136,10 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Outlet />
-      <Toaster position="top-center" richColors closeButton dir="rtl" />
+      <div key={locale} dir={dir} lang={locale} className="contents">
+        <Outlet />
+      </div>
+      <Toaster position="top-center" richColors closeButton dir={dir} />
     </QueryClientProvider>
   );
 }

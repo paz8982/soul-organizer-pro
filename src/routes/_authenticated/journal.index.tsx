@@ -15,7 +15,7 @@ const journalQuery = queryOptions({
   queryFn: () => listJournalEntries(),
 });
 
-export const Route = createFileRoute("/_authenticated/journal")({
+export const Route = createFileRoute("/_authenticated/journal/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(journalQuery),
   component: JournalPage,
 });

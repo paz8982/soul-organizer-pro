@@ -15,7 +15,7 @@ const archiveQuery = queryOptions({
   queryFn: () => listArchive(),
 });
 
-export const Route = createFileRoute("/_authenticated/archive")({
+export const Route = createFileRoute("/_authenticated/archive/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(archiveQuery),
   component: ArchivePage,
 });
