@@ -66,7 +66,8 @@ export const processVoiceCommand = createServerFn({ method: "POST" })
     // 1) Transcribe
     const bytes = base64ToUint8(data.audioBase64);
     const ext = extForMime(data.mimeType);
-    const blob = new Blob([bytes], { type: data.mimeType });
+    const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
+    const blob = new Blob([ab], { type: data.mimeType });
     const form = new FormData();
     form.append("model", "openai/gpt-4o-mini-transcribe");
     form.append("file", blob, `recording.${ext}`);
