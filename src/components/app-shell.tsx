@@ -36,6 +36,7 @@ const NAV: NavItem[] = [
 export function AppShell({ children }: { children: ReactNode }) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [quickOpen, setQuickOpen] = useState(false);
+  const [voiceOpen, setVoiceOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const router = useRouter();
