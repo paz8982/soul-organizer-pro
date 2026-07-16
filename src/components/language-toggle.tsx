@@ -21,7 +21,7 @@ export function LanguageToggle({ className }: { className?: string }) {
       title={t("lang.toggle")}
     >
       <Languages className="h-4 w-4" />
-      <span className="ms-1.5 text-xs font-medium">{nextLabel}</span>
+      <span className="ms-1.5 hidden text-xs font-medium sm:inline">{nextLabel}</span>
     </Button>
   );
 }
