@@ -93,7 +93,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* Top bar */}
-        <header className="sticky top-0 z-30 flex items-center gap-2 border-b bg-background/80 px-4 py-3 backdrop-blur md:px-8">
+        <header className="sticky top-0 z-30 flex items-center gap-1.5 border-b bg-background/80 px-3 py-3 backdrop-blur md:gap-2 md:px-8">
           <Link to="/dashboard" className="ms-2 flex items-center gap-2 md:hidden">
             <div className="grid h-8 w-8 place-items-center rounded-lg bg-primary text-primary-foreground">
               <span className="font-display text-base">מ</span>
