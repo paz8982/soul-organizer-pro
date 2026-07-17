@@ -128,8 +128,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-8">{children}</main>
 
         {/* Mobile bottom nav */}
-        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background/95 backdrop-blur md:hidden">
-          {NAV.filter((n) => n.to !== "/learn").map((item) => {
+        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t bg-background/95 backdrop-blur md:hidden">
+          {NAV.map((item) => {
             const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
             const Icon = item.icon;
             return (
