@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { createArchiveItem } from "@/lib/archive.functions";
+import { enrichLink } from "@/lib/link-enrich.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
@@ -12,9 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TagInput } from "@/components/tag-input";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
+import { t, getLocale } from "@/lib/i18n";
+
 
 export const Route = createFileRoute("/_authenticated/archive/new")({
   validateSearch: z.object({
