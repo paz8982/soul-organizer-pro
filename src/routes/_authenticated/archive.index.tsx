@@ -93,27 +93,28 @@ function ArchivePage() {
           {filtered.map((i: any) => {
             const Icon = iconFor(i.item_type);
             return (
-              <Link key={i.id} to="/archive/$id" params={{ id: i.id }}>
-                <Card className="h-full p-4 transition-all hover:border-primary/40 hover:shadow-md">
+              <Link key={i.id} to="/archive/$id" params={{ id: i.id }} className="min-w-0">
+                <Card className="h-full min-w-0 overflow-hidden p-4 transition-all hover:border-primary/40 hover:shadow-md">
                   <div className="mb-3 flex items-start gap-3">
                     <div className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-secondary text-primary">
                       <Icon className="h-5 w-5" />
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate font-medium">{i.title}</p>
+                      <p className="truncate font-medium" title={i.title}>{i.title}</p>
                       <p className="mt-0.5 text-[11px] uppercase tracking-wider text-muted-foreground">{itemTypeLabel(i.item_type)}</p>
                     </div>
                   </div>
-                  {i.description && <p className="line-clamp-2 text-sm text-muted-foreground">{i.description}</p>}
+                  {i.description && <p className="line-clamp-2 break-words text-sm text-muted-foreground">{i.description}</p>}
                   {i.tags?.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-1">
                       {i.tags.slice(0, 4).map((tag: string) => (
-                        <span key={tag} className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">#{tag}</span>
+                        <span key={tag} className="max-w-full truncate rounded-full bg-muted px-1.5 py-0.5 text-[10px]">#{tag}</span>
                       ))}
                     </div>
                   )}
                 </Card>
               </Link>
+
             );
           })}
         </div>

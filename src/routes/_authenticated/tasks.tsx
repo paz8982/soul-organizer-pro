@@ -161,7 +161,7 @@ function TasksPage() {
                   {task.tags?.map((tag: string) => <span key={tag}>#{tag}</span>)}
                 </div>
               </div>
-              <div className="flex opacity-0 group-hover:opacity-100">
+              <div className="flex opacity-100 sm:opacity-0 sm:group-hover:opacity-100">
                 <Button
                   size="icon"
                   variant="ghost"
