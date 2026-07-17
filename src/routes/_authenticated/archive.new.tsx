@@ -39,7 +39,7 @@ function NewArchiveItem() {
   const navigate = useNavigate();
   const qc = useQueryClient();
 
-  const initialTab = search.url ? "link" : search.text ? "note" : "file";
+  const initialTab = search.text ? "note" : "link";
   const [tab, setTab] = useState<string>(initialTab);
   const [title, setTitle] = useState(search.title ?? "");
   const [description, setDescription] = useState("");
@@ -147,10 +147,30 @@ function NewArchiveItem() {
       <Card className="p-6 space-y-5">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="file">{t("archive.tab.file")}</TabsTrigger>
             <TabsTrigger value="link">{t("archive.tab.link")}</TabsTrigger>
+            <TabsTrigger value="file">{t("archive.tab.file")}</TabsTrigger>
             <TabsTrigger value="note">{t("archive.tab.note")}</TabsTrigger>
           </TabsList>
+
+          <TabsContent value="link" className="pt-4 space-y-2">
+            <Label>{t("label.url")}</Label>
+            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("archive.urlPlaceholder")} dir="ltr" />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => enrichMut.mutate()}
+              disabled={!url || enrichMut.isPending}
+              className="mt-2"
+            >
+              {enrichMut.isPending ? (
+                <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="ms-2 h-4 w-4" />
+              )}
+              {enrichMut.isPending ? t("archive.fetching") : t("archive.fetchFromLink")}
+            </Button>
+          </TabsContent>
 
           <TabsContent value="file" className="pt-4">
             <button
@@ -184,27 +204,6 @@ function NewArchiveItem() {
               />
             </button>
           </TabsContent>
-
-          <TabsContent value="link" className="pt-4 space-y-2">
-            <Label>{t("label.url")}</Label>
-            <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("archive.urlPlaceholder")} dir="ltr" />
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => enrichMut.mutate()}
-              disabled={!url || enrichMut.isPending}
-              className="mt-2"
-            >
-              {enrichMut.isPending ? (
-                <Loader2 className="ms-2 h-4 w-4 animate-spin" />
-              ) : (
-                <Sparkles className="ms-2 h-4 w-4" />
-              )}
-              {enrichMut.isPending ? t("archive.fetching") : t("archive.fetchFromLink")}
-            </Button>
-          </TabsContent>
-
 
           <TabsContent value="note" className="pt-4 space-y-2">
             <Label>{t("label.note")}</Label>
