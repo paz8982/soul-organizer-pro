@@ -3,6 +3,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { createArchiveItem } from "@/lib/archive.functions";
+import { enrichLink } from "@/lib/link-enrich.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
@@ -12,9 +13,10 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { TagInput } from "@/components/tag-input";
-import { Upload, Loader2 } from "lucide-react";
+import { Upload, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
+import { t, getLocale } from "@/lib/i18n";
+
 
 export const Route = createFileRoute("/_authenticated/archive/new")({
   validateSearch: z.object({
@@ -50,13 +52,54 @@ function NewArchiveItem() {
 
   const source = search.title || search.text || search.url ? "share" : "manual";
 
+  const enrichMut = useMutation({
+    mutationFn: () => enrichLink({ data: { url, locale: getLocale() } }),
+    onSuccess: (res) => {
+      if (res.title && !title) setTitle(res.title);
+      if (res.description && !description) setDescription(res.description);
+      if (res.tags?.length) {
+        setTags((prev) => {
+          const merged = [...prev];
+          for (const tg of res.tags) if (!merged.includes(tg)) merged.push(tg);
+          return merged.slice(0, 8);
+        });
+      }
+      toast.success(t("archive.fetched"));
+    },
+    onError: () => toast.error(t("archive.fetchFailed")),
+  });
+
   const mut = useMutation({
     mutationFn: async () => {
+      let effectiveTitle = title;
+      let effectiveDescription = description;
+      let effectiveTags = tags;
+
+      // Auto-enrich when saving a link with no title yet
+      if (tab === "link" && url && !effectiveTitle.trim()) {
+        try {
+          const res = await enrichLink({ data: { url, locale: getLocale() } });
+          if (res.title) effectiveTitle = res.title;
+          if (res.description && !effectiveDescription) effectiveDescription = res.description;
+          if (res.tags?.length) {
+            const merged = [...effectiveTags];
+            for (const tg of res.tags) if (!merged.includes(tg)) merged.push(tg);
+            effectiveTags = merged.slice(0, 8);
+          }
+          // reflect in UI too
+          setTitle(effectiveTitle);
+          if (effectiveDescription) setDescription(effectiveDescription);
+          setTags(effectiveTags);
+        } catch {
+          /* ignore, fall back to url as title */
+        }
+      }
+
       const payload: any = {
-        title: title || (url ? url : file?.name ?? "ללא כותרת"),
-        description: description || null,
+        title: effectiveTitle || (url ? url : file?.name ?? "ללא כותרת"),
+        description: effectiveDescription || null,
         notes: notes || null,
-        tags,
+        tags: effectiveTags,
         source,
       };
 
@@ -96,6 +139,7 @@ function NewArchiveItem() {
       setUploading(false);
     },
   });
+
 
   return (
     <div className="mx-auto max-w-2xl">
@@ -144,7 +188,23 @@ function NewArchiveItem() {
           <TabsContent value="link" className="pt-4 space-y-2">
             <Label>{t("label.url")}</Label>
             <Input value={url} onChange={(e) => setUrl(e.target.value)} placeholder={t("archive.urlPlaceholder")} dir="ltr" />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => enrichMut.mutate()}
+              disabled={!url || enrichMut.isPending}
+              className="mt-2"
+            >
+              {enrichMut.isPending ? (
+                <Loader2 className="ms-2 h-4 w-4 animate-spin" />
+              ) : (
+                <Sparkles className="ms-2 h-4 w-4" />
+              )}
+              {enrichMut.isPending ? t("archive.fetching") : t("archive.fetchFromLink")}
+            </Button>
           </TabsContent>
+
 
           <TabsContent value="note" className="pt-4 space-y-2">
             <Label>{t("label.note")}</Label>

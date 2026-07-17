@@ -221,6 +221,11 @@ const he: Dict = {
   "archive.confirmDelete": "למחוק את הפריט הזה מהארכיון?",
   "archive.back": "חזרה לארכיון",
   "archive.downloadFile": "הורדת הקובץ",
+  "archive.fetchFromLink": "השלמה אוטומטית מהקישור",
+  "archive.fetching": "טוען פרטים מהקישור…",
+  "archive.fetched": "הפרטים הושלמו",
+  "archive.fetchFailed": "לא הצלחתי לטעון פרטים מהקישור",
+
 
   "auth.subtitle": "מקום שקט אחד למשימות, יומן וארכיון.",
   "auth.signIn": "כניסה",
@@ -480,6 +485,11 @@ const en: Dict = {
   "archive.confirmDelete": "Delete this item from the archive?",
   "archive.back": "Back to archive",
   "archive.downloadFile": "Download file",
+  "archive.fetchFromLink": "Auto-fill from link",
+  "archive.fetching": "Fetching link details…",
+  "archive.fetched": "Details filled in",
+  "archive.fetchFailed": "Couldn't fetch details from that link",
+
 
   "auth.subtitle": "One quiet place for tasks, journal and archive.",
   "auth.signIn": "Sign in",
