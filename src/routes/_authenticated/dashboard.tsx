@@ -149,7 +149,7 @@ function TaskRow({ task, onComplete }: { task: any; onComplete: () => void }) {
         <CheckSquare className="hidden h-4 w-4 group-hover:block" />
       </button>
       <div className="min-w-0 flex-1">
-        <p className={cn("truncate text-xs md:text-sm font-medium leading-snug", task.status === "completed" && "line-through opacity-60")}>
+        <p className={cn("truncate text-[13px] md:text-sm font-medium leading-snug", task.status === "completed" && "line-through opacity-60")}>
           {task.title}
         </p>
         <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
