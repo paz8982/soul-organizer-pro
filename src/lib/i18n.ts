@@ -156,6 +156,8 @@ const he: Dict = {
   "dashboard.subtitle.zero": "אין לך משימות פעילות כרגע.",
   "dashboard.subtitle.one": "יש לך משימה פעילה אחת.",
   "dashboard.subtitle.many": "יש לך {n} משימות פעילות.",
+  "dashboard.allActive": "כל המשימות הפעילות",
+  "dashboard.allActiveEmpty": "אין משימות פעילות. תיהנה מהשקט.",
   "dashboard.today": "היום",
   "dashboard.todayEmpty": "אין משימות להיום. תיהנה מהשקט.",
   "dashboard.overdue": "באיחור",
