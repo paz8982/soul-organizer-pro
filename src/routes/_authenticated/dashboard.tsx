@@ -9,6 +9,7 @@ import { moodEmoji } from "@/components/mood-picker";
 import { CheckSquare, Circle, Archive as ArchiveIcon, BookHeart, ArrowLeft, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { t, greetingKey, formatDayMonth, formatDateShort, itemTypeLabel } from "@/lib/i18n";
+import { useMemo } from "react";
 
 const dashboardQuery = queryOptions({
   queryKey: ["dashboard"],
@@ -28,6 +29,17 @@ function Dashboard() {
     onSuccess: () => qc.invalidateQueries(),
   });
 
+  const allTasks = useMemo(() => {
+    const list = [...data.overdue, ...data.todayTasks, ...data.upcoming];
+    list.sort((a: any, b: any) => {
+      const dA = a.due_date || "9999-12-31";
+      const dB = b.due_date || "9999-12-31";
+      if (dA !== dB) return dA.localeCompare(dB);
+      return (a.due_time || "").localeCompare(b.due_time || "");
+    });
+    return list;
+  }, [data]);
+
   const n = data.activeTaskCount;
   const subKey = n === 0 ? "dashboard.subtitle.zero" : n === 1 ? "dashboard.subtitle.one" : "dashboard.subtitle.many";
 
@@ -36,51 +48,22 @@ function Dashboard() {
       <PageHeader title={t(greetingKey())} description={t(subKey, { n })} />
 
       <div className="grid gap-5 md:grid-cols-2">
-        {/* Today */}
-        <Card className="p-5">
+        {/* All active tasks — single scrollable list */}
+        <Card className="md:col-span-2 p-5">
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">{t("dashboard.today")}</h2>
+            <h2 className="font-display text-xl">{t("dashboard.allActive")}</h2>
             <Link to="/tasks" className="text-xs text-primary hover:underline">{t("dashboard.allTasks")}</Link>
           </div>
-          {data.todayTasks.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.todayEmpty")}</p>
+          {allTasks.length === 0 ? (
+            <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.allActiveEmpty")}</p>
           ) : (
-            <ul className="space-y-1">
-              {data.todayTasks.map((task: any) => (
-                <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} />
-              ))}
-            </ul>
-          )}
-        </Card>
-
-        {/* Overdue */}
-        {data.overdue.length > 0 && (
-          <Card className="border-destructive/30 bg-destructive/5 p-5">
-            <div className="mb-3 flex items-center gap-2">
-              <AlertCircle className="h-4 w-4 text-destructive" />
-              <h2 className="font-display text-xl">{t("dashboard.overdue")}</h2>
+            <div className="max-h-[320px] overflow-y-auto md:max-h-[380px]">
+              <ul className="space-y-1">
+                {allTasks.map((task: any) => (
+                  <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} />
+                ))}
+              </ul>
             </div>
-            <ul className="space-y-1">
-              {data.overdue.slice(0, 5).map((task: any) => (
-                <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} />
-              ))}
-            </ul>
-          </Card>
-        )}
-
-        {/* Upcoming */}
-        <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">{t("dashboard.upcoming")}</h2>
-          </div>
-          {data.upcoming.length === 0 ? (
-            <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.upcomingEmpty")}</p>
-          ) : (
-            <ul className="space-y-1">
-              {data.upcoming.slice(0, 6).map((task: any) => (
-                <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} showDate />
-              ))}
-            </ul>
           )}
         </Card>
 
@@ -118,7 +101,7 @@ function Dashboard() {
         </Card>
 
         {/* Recent archive */}
-        <Card className="md:col-span-2 p-5">
+        <Card className="p-5">
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-display text-xl">{t("dashboard.recentArchive")}</h2>
             <Link to="/archive" className="text-xs text-primary hover:underline">{t("dashboard.openArchive")}</Link>
@@ -126,7 +109,7 @@ function Dashboard() {
           {data.recentArchive.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.archiveEmpty")}</p>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2">
               {data.recentArchive.map((a: any) => (
                 <Link
                   key={a.id}
@@ -151,9 +134,12 @@ function Dashboard() {
   );
 }
 
-function TaskRow({ task, onComplete, showDate }: { task: any; onComplete: () => void; showDate?: boolean }) {
+function TaskRow({ task, onComplete }: { task: any; onComplete: () => void }) {
+  const today = new Date().toISOString().slice(0, 10);
+  const isOverdue = task.due_date && task.due_date < today;
+
   return (
-    <li className="group flex items-center gap-3 rounded-lg py-2 px-2 -mx-2 hover:bg-muted">
+    <li className={cn("group flex items-center gap-2 rounded-lg py-2 px-2 -mx-2", isOverdue && "bg-destructive/5")}>
       <button
         onClick={onComplete}
         className="text-muted-foreground transition-colors hover:text-primary"
@@ -162,11 +148,26 @@ function TaskRow({ task, onComplete, showDate }: { task: any; onComplete: () => 
         <Circle className="h-4 w-4 group-hover:hidden" />
         <CheckSquare className="hidden h-4 w-4 group-hover:block" />
       </button>
-      <span className={cn("flex-1 truncate text-sm", task.status === "completed" && "line-through opacity-60")}>{task.title}</span>
+      <div className="min-w-0 flex-1">
+        <p className={cn("truncate text-xs md:text-sm font-medium leading-snug", task.status === "completed" && "line-through opacity-60")}>
+          {task.title}
+        </p>
+        <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+          {isOverdue && (
+            <span className="inline-flex items-center gap-1 text-destructive">
+              <AlertCircle className="h-3 w-3" />
+              {t("dashboard.overdue")}
+            </span>
+          )}
+          {task.due_date && (
+            <span>
+              {formatDayMonth(task.due_date)}
+              {task.due_time && ` · ${task.due_time.slice(0, 5)}`}
+            </span>
+          )}
+        </div>
+      </div>
       <PriorityBadge priority={task.priority} />
-      {showDate && task.due_date && (
-        <span className="text-xs text-muted-foreground">{formatDayMonth(task.due_date)}</span>
-      )}
     </li>
   );
 }
