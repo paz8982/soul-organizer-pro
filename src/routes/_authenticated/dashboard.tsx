@@ -57,7 +57,7 @@ function Dashboard() {
           {allTasks.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.allActiveEmpty")}</p>
           ) : (
-            <div className="max-h-[320px] overflow-y-auto md:max-h-[380px]">
+            <div className="max-h-[260px] overflow-y-auto md:max-h-[360px] -me-1">
               <ul className="space-y-1">
                 {allTasks.map((task: any) => (
                   <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} />
