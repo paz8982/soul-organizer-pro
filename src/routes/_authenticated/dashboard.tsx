@@ -57,8 +57,8 @@ function Dashboard() {
           {allTasks.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.allActiveEmpty")}</p>
           ) : (
-            <div className="max-h-[260px] overflow-y-auto md:max-h-[360px] -me-1">
-              <ul className="space-y-1">
+            <div className="max-h-[260px] overflow-y-auto overflow-x-hidden pe-1 md:max-h-[360px]">
+              <ul className="min-w-0 space-y-1 overflow-hidden">
                 {allTasks.map((task: any) => (
                   <TaskRow key={task.id} task={task} onComplete={() => toggle.mutate(task.id)} />
                 ))}
@@ -139,10 +139,10 @@ function TaskRow({ task, onComplete }: { task: any; onComplete: () => void }) {
   const isOverdue = task.due_date && task.due_date < today;
 
   return (
-    <li className={cn("group flex items-center gap-2 rounded-lg py-2 px-2 -mx-2", isOverdue && "bg-destructive/5")}>
+    <li className={cn("group flex w-full min-w-0 items-center gap-2 rounded-lg px-2 py-2", isOverdue && "bg-destructive/5")}>
       <button
         onClick={onComplete}
-        className="text-muted-foreground transition-colors hover:text-primary"
+        className="shrink-0 text-muted-foreground transition-colors hover:text-primary"
         aria-label={t("dashboard.completeTask")}
       >
         <Circle className="h-4 w-4 group-hover:hidden" />
@@ -167,7 +167,7 @@ function TaskRow({ task, onComplete }: { task: any; onComplete: () => void }) {
           )}
         </div>
       </div>
-      <PriorityBadge priority={task.priority} />
+      <PriorityBadge priority={task.priority} className="shrink-0" />
     </li>
   );
 }
