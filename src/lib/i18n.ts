@@ -422,6 +422,8 @@ const en: Dict = {
   "dashboard.subtitle.zero": "You have no active tasks.",
   "dashboard.subtitle.one": "You have one active task.",
   "dashboard.subtitle.many": "You have {n} active tasks.",
+  "dashboard.allActive": "All active tasks",
+  "dashboard.allActiveEmpty": "No active tasks. Enjoy the quiet.",
   "dashboard.today": "Today",
   "dashboard.todayEmpty": "Nothing due today. Enjoy the quiet.",
   "dashboard.overdue": "Overdue",
