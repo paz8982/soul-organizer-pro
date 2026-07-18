@@ -30,7 +30,7 @@ function Dashboard() {
   });
 
   const allTasks = useMemo(() => {
-    const list = [...data.overdue, ...data.todayTasks, ...data.upcoming];
+    const list = [...(data.activeTasks ?? [])];
     list.sort((a: any, b: any) => {
       const dA = a.due_date || "9999-12-31";
       const dB = b.due_date || "9999-12-31";
