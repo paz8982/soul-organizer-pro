@@ -44,15 +44,15 @@ function Dashboard() {
   const subKey = n === 0 ? "dashboard.subtitle.zero" : n === 1 ? "dashboard.subtitle.one" : "dashboard.subtitle.many";
 
   return (
-    <div className="mx-auto max-w-6xl">
+    <div className="mx-auto max-w-6xl min-w-0 overflow-x-hidden">
       <PageHeader title={t(greetingKey())} description={t(subKey, { n })} />
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid min-w-0 gap-5 md:grid-cols-2">
         {/* All active tasks — single scrollable list */}
-        <Card className="md:col-span-2 p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">{t("dashboard.allActive")}</h2>
-            <Link to="/tasks" className="text-xs text-primary hover:underline">{t("dashboard.allTasks")}</Link>
+        <Card className="min-w-0 overflow-hidden p-5 md:col-span-2">
+          <div className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <h2 className="min-w-0 truncate font-display text-xl">{t("dashboard.allActive")}</h2>
+            <Link to="/tasks" className="shrink-0 text-xs text-primary hover:underline">{t("dashboard.allTasks")}</Link>
           </div>
           {allTasks.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.allActiveEmpty")}</p>
