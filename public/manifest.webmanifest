@@ -13,6 +13,17 @@
   "icons": [
     { "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
   ],
+  "shortcuts": [
+    {
+      "name": "עוזר קולי",
+      "short_name": "מיקרופון",
+      "description": "פתח מיד את המיקרופון להוספה מהירה בקול",
+      "url": "/dashboard?action=voice",
+      "icons": [
+        { "src": "/pwa-icon.svg", "sizes": "any", "type": "image/svg+xml" }
+      ]
+    }
+  ],
   "share_target": {
     "action": "/capture",
     "method": "GET",
