@@ -217,5 +217,76 @@ Return JSON only per schema.`;
     } catch {
       parsed = { items: [] };
     }
-    return { items: (parsed.items ?? []).slice(0, 5) };
+
+    // Validate URLs so we never surface dead / removed media.
+    const candidates = (parsed.items ?? []).slice(0, 8);
+    const checked = await Promise.all(
+      candidates.map(async (item) => ((await isUrlAvailable(item.url)) ? item : null)),
+    );
+    const available = checked.filter((x): x is Recommendation => x !== null).slice(0, 5);
+    return { items: available };
   });
+
+// ---------- URL availability ----------
+function extractYouTubeId(url: string): string | null {
+  try {
+    const u = new URL(url);
+    const host = u.hostname.replace(/^www\./, "");
+    if (host === "youtu.be") return u.pathname.slice(1) || null;
+    if (host.endsWith("youtube.com")) {
+      if (u.pathname === "/watch") return u.searchParams.get("v");
+      const m = u.pathname.match(/^\/(?:embed|shorts|v)\/([^/?#]+)/);
+      if (m) return m[1];
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+async function isUrlAvailable(url: string): Promise<boolean> {
+  try {
+    const ytId = extractYouTubeId(url);
+    if (ytId) {
+      // YouTube blocks HEAD/embed pings for private/removed videos.
+      // oEmbed returns 401/404 for unavailable videos, 200 for playable ones.
+      const r = await fetch(
+        `https://www.youtube.com/oembed?format=json&url=${encodeURIComponent(
+          `https://www.youtube.com/watch?v=${ytId}`,
+        )}`,
+        { method: "GET" },
+      );
+      return r.ok;
+    }
+    // Skip validating search URLs (they always resolve but aren't the content).
+    const u = new URL(url);
+    if (/^(www\.)?(google|bing|duckduckgo)\./.test(u.hostname) && u.pathname.startsWith("/search")) {
+      return false;
+    }
+    // Generic: try HEAD, fall back to a small GET.
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), 4000);
+    try {
+      let r = await fetch(url, {
+        method: "HEAD",
+        redirect: "follow",
+        signal: controller.signal,
+        headers: { "User-Agent": "Mozilla/5.0 (compatible; SecondBrainBot/1.0)" },
+      });
+      if (r.status === 405 || r.status === 403) {
+        r = await fetch(url, {
+          method: "GET",
+          redirect: "follow",
+          signal: controller.signal,
+          headers: { "User-Agent": "Mozilla/5.0 (compatible; SecondBrainBot/1.0)" },
+        });
+      }
+      return r.ok;
+    } finally {
+      clearTimeout(timer);
+    }
+  } catch {
+    return false;
+  }
+}
+

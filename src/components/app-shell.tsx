@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, useLocation, useNavigate, useRouter } from "@tanstack/react-router";
 import {
   LayoutDashboard,
@@ -49,6 +49,24 @@ export function AppShell({ children }: { children: ReactNode }) {
     router.invalidate();
     navigate({ to: "/auth", replace: true });
   };
+
+  // Auto-open voice dialog when launched from the PWA "Voice" shortcut
+  // (/dashboard?action=voice). Strip the param so refreshes don't reopen it.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "voice") {
+      setVoiceOpen(true);
+      params.delete("action");
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash,
+      );
+    }
+  }, [location.pathname]);
+
 
   return (
     <div className="flex min-h-screen bg-background">
