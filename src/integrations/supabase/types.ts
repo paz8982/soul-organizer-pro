@@ -152,6 +152,7 @@ export type Database = {
           duration_minutes: number | null
           format: Database["public"]["Enums"]["learning_format"]
           id: string
+          rating: number | null
           reflection: string | null
           source: string | null
           status: Database["public"]["Enums"]["learning_status"]
@@ -169,6 +170,7 @@ export type Database = {
           duration_minutes?: number | null
           format?: Database["public"]["Enums"]["learning_format"]
           id?: string
+          rating?: number | null
           reflection?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["learning_status"]
@@ -186,6 +188,7 @@ export type Database = {
           duration_minutes?: number | null
           format?: Database["public"]["Enums"]["learning_format"]
           id?: string
+          rating?: number | null
           reflection?: string | null
           source?: string | null
           status?: Database["public"]["Enums"]["learning_status"]

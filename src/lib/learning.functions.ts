@@ -100,6 +100,7 @@ export const updateLearningItem = createServerFn({ method: "POST" })
             status: statusEnum.optional(),
             reflection: z.string().nullable().optional(),
             completed_at: z.string().nullable().optional(),
+            rating: z.union([z.literal(-1), z.literal(1), z.literal(2)]).nullable().optional(),
           })
           .partial(),
       })
@@ -115,6 +116,7 @@ export const updateLearningItem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const deleteLearningItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -136,9 +138,43 @@ const recommendInput = z.object({
 export const recommendLearning = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => recommendInput.parse(data))
-  .handler(async ({ data }): Promise<{ items: Recommendation[] }> => {
+  .handler(async ({ data, context }): Promise<{ items: Recommendation[] }> => {
     const apiKey = process.env.LOVABLE_API_KEY;
     if (!apiKey) throw new Error("Missing LOVABLE_API_KEY");
+
+    // Pull the user's rated history to steer the model.
+    const { data: ratedRows } = await client(context)
+      .from("learning_items")
+      .select("title, source, category, rating")
+      .not("rating", "is", null)
+      .order("updated_at", { ascending: false })
+      .limit(40);
+    const rated = (ratedRows ?? []) as Array<{
+      title: string;
+      source: string | null;
+      category: string | null;
+      rating: number;
+    }>;
+    const fmt = (r: { title: string; source: string | null; category: string | null }) =>
+      `- "${r.title}"${r.source ? ` — ${r.source}` : ""}${r.category ? ` (${r.category})` : ""}`;
+    const loved = rated.filter((r) => r.rating === 2).slice(0, 15).map(fmt).join("\n");
+    const liked = rated.filter((r) => r.rating === 1).slice(0, 15).map(fmt).join("\n");
+    const disliked = rated.filter((r) => r.rating === -1).slice(0, 15).map(fmt).join("\n");
+
+    const prefsHe = [
+      loved && `העדפות חזקות (המשתמש אהב מאוד — העדף יוצרים/סגנון/נושאים דומים):\n${loved}`,
+      liked && `אהב (העדף דומים):\n${liked}`,
+      disliked && `לא אהב (הימנע מדומים):\n${disliked}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
+    const prefsEn = [
+      loved && `Strong preferences (user LOVED — prefer similar creators/style/topics):\n${loved}`,
+      liked && `Liked (prefer similar):\n${liked}`,
+      disliked && `Disliked (avoid similar):\n${disliked}`,
+    ]
+      .filter(Boolean)
+      .join("\n\n");
 
     const sys =
       data.locale === "he"
@@ -147,13 +183,16 @@ export const recommendLearning = createServerFn({ method: "POST" })
 - קטגוריה: ${data.category}
 - משך: חובה שהאורך המלא של הפריט יהיה קטן או שווה ל-${data.duration_minutes} דקות. אל תמליץ על פריט ארוך יותר גם אם הסדרה/הערוץ מתאימים. עבור פודקאסטים בחר פרק ספציפי קצר; עבור וידאו בחר קליפ קצר / TED-Ed / Short; עבור טקסט בחר כתבה שזמן הקריאה שלה מתאים.
 כל המלצה: כותרת ותיאור קצר בעברית טבעית, מקור אמין, URL ישיר לפריט הספציפי (לא לערוץ/סדרה), duration_minutes מספרי המשקף את האורך האמיתי, category.
+${prefsHe ? `\nהיסטוריית העדפות של המשתמש — קח בחשבון:\n${prefsHe}\n` : ""}
 החזר JSON בלבד לפי הסכימה.`
         : `Recommend 5 diverse high-quality short-learning items.
 - format: ${data.format} (video=YouTube/TED, audio=Podcast/Spotify, text=article/blog)
 - category: ${data.category}
 - duration: the item's full length MUST be ≤ ${data.duration_minutes} minutes. Never recommend a longer item, even if the channel/series is a great match. For podcasts pick a specific short episode; for video pick a short clip / TED-Ed / Short; for text pick an article whose read time fits.
 Each item: concise title & description, credible source, DIRECT URL to the specific item (not the channel/series), numeric duration_minutes reflecting the real length, category.
+${prefsEn ? `\nUser preference history — take into account:\n${prefsEn}\n` : ""}
 Return JSON only per schema.`;
+
 
     const res = await fetch(`${GATEWAY}/chat/completions`, {
       method: "POST",

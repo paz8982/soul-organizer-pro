@@ -1,39 +1,31 @@
-## Quick Learning — three fixes
+## Quick Learning — Rating on completion
 
-### 1. Open content in the external browser
-- In `src/routes/_authenticated/learn.tsx`, both "Open" buttons (recommendation card + saved item card) currently use `<a target="_blank">`. Inside the installed PWA on Android, this can still open inside the app's webview.
-- Replace those anchors with a plain button that calls `window.open(url, "_blank", "noopener,noreferrer")`. Combined with `rel="noopener"`, Android treats this as an external intent and opens the system browser, keeping the app usable underneath.
+Add a 3-level rating (didn't like / liked / loved) captured when an item is marked as completed, then feed it back into the AI recommender so future suggestions favor what the user liked and avoid what they didn't.
 
-### 2. Duration matching — only recommend items that fit
-- Strengthen the AI prompt in `recommendLearning` (`src/lib/learning.functions.ts`):
-  - Explicit rule: `duration_minutes` MUST be ≤ requested minutes. Never return a longer item, even if the series/channel is a good match. For podcasts, pick a specific short episode; for videos, pick a short-form clip / TED-Ed / Short. For text, pick an article whose read time fits.
-  - Ask for at least 5 candidates so post-filtering still yields results.
-- Add a server-side hard filter after parsing: drop any item where `duration_minutes > requested + 1` (small tolerance). Keep the existing URL-availability check; return up to 3 valid items.
+### Data
+- Add nullable column `rating smallint` to `public.learning_items` with a CHECK `rating IN (-1, 1, 2)` (thumb down / thumb up / two thumbs up). No enum needed; keeps math easy for aggregation.
+- Migration only adds the column; existing rows stay `NULL`.
 
-### 3. New "Started / התחלתי" tab
-Behavior:
-- Tapping **Open content** on any card auto-marks the item as `in_progress` (and, for a Discover recommendation not yet saved, auto-creates the row with that status). "Save for later" from Discover keeps working exactly as today and lands in **My List**.
-- New tab **התחלתי / Started** sits between **My List** and **Completed**. It lists items with status `in_progress` and allows: reopen link (again auto-updates timestamp), **Mark completed** (moves to Completed), **Move to My List**, **Delete**.
-- Completing or reopening from other tabs also works as today.
+### Server (`src/lib/learning.functions.ts`)
+- Extend `updateLearningItem` patch schema with `rating: z.union([z.literal(-1), z.literal(1), z.literal(2)]).nullable().optional()`.
+- In `recommendLearning`, before calling the AI, fetch the user's rated history via the authenticated supabase client:
+  - Liked/loved (rating >= 1): pull last ~20 titles + sources + category, split into "loved" (2) and "liked" (1).
+  - Disliked (rating = -1): pull last ~20 titles + sources.
+- Inject into the system prompt as two short bulleted lists ("The user loved / liked these — prefer similar creators, topics, styles" and "The user disliked these — avoid similar"). Keep prompt bilingual (he/en) matching current pattern.
+- Keep existing duration filter and URL availability check.
 
-Data model:
-- Extend the status enum used in the app to include `in_progress`. `learning_items.status` is currently a `text` column (schema shows no enum) — no migration required; just widen the Zod `statusEnum` and add the value in queries. If a DB CHECK exists, add a migration to allow `in_progress`. (Will verify with `supabase--read_query` at build time before deciding on the migration.)
-- Add optional `started_at` tracking by reusing `updated_at` ordering — no schema change.
+### UI (`src/routes/_authenticated/learn.tsx`)
+- On the Completed action ("Mark completed") in `SavedItemCard` and in the Started tab: after marking complete, open a small inline rating row (or a compact dialog) with 3 icon buttons using lucide `ThumbsDown`, `ThumbsUp`, and a doubled `ThumbsUp` (two side by side) — with `aria-label` from i18n. Selecting one calls `updateLearningItem` with `{ rating, status: "completed", completed_at: now }`.
+- In the Completed tab, show the current rating as small icons on each card, and allow changing it by tapping a different icon (same 3-button row, highlighting the active one).
+- Recommendation cards get no rating UI (only completed items are rated).
 
-Server (`src/lib/learning.functions.ts`):
-- Add `statusEnum` value `in_progress`.
-- Add `markLearningItemStarted({ id })` — sets status to `in_progress` if currently `saved`/`recommended`, leaves `completed` untouched, bumps `updated_at`.
-- Add `startRecommendation({ ...recommendationFields })` — inserts a new row with status `in_progress` (used when opening a Discover recommendation the user never saved).
-
-UI (`src/routes/_authenticated/learn.tsx`):
-- Add fourth `TabsTrigger`/`TabsContent` for `in_progress` between `list` and `completed`.
-- `RecommendationCard` "Open" click → `startRecommendation` mutation, then `window.open`. Invalidate `learn-items`.
-- `SavedItemCard` "Open" click on a saved (My List) item → `markLearningItemStarted`, then `window.open`.
-- Started tab reuses `SavedItemCard` with actions: Open, Mark completed, Move to My List (sets status back to `saved`), Delete.
-
-Localization (`src/lib/i18n.ts`):
-- Add keys: `learn.tab.inProgress` ("התחלתי" / "Started"), `learn.moveToList`, `learn.emptyInProgress`, plus any new button labels.
+### i18n (`src/lib/i18n.ts`)
+Add keys (he/en):
+- `learn.rate.prompt` — "איך היה?" / "How was it?"
+- `learn.rate.disliked` — "לא אהבתי" / "Didn't like"
+- `learn.rate.liked` — "אהבתי" / "Liked"
+- `learn.rate.loved` — "אהבתי מאוד" / "Loved"
 
 ### Out of scope
-- No changes to auth, RLS, or other modules.
-- Voice assistant, share target, dashboard remain untouched.
+- No changes to Discover wizard inputs, auth, other modules.
+- No aggregate analytics UI; ratings are only used to steer the AI.
