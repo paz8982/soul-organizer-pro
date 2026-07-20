@@ -30,12 +30,19 @@ import {
   deleteLearningItem,
   listLearningCategories,
   listLearningItems,
+  markLearningItemStarted,
   recommendLearning,
   saveLearningItem,
+  startRecommendation,
   updateLearningItem,
   type LearningFormat,
   type Recommendation,
 } from "@/lib/learning.functions";
+
+function openExternal(url: string) {
+  // Force the system browser even inside the installed PWA on Android.
+  window.open(url, "_blank", "noopener,noreferrer");
+}
 
 export const Route = createFileRoute("/_authenticated/learn")({
   component: LearnPage,
@@ -88,6 +95,7 @@ function LearnPage() {
         <TabsList className="mb-6">
           <TabsTrigger value="discover">{t("learn.tab.discover")}</TabsTrigger>
           <TabsTrigger value="list">{t("learn.tab.list")}</TabsTrigger>
+          <TabsTrigger value="in_progress">{t("learn.tab.inProgress")}</TabsTrigger>
           <TabsTrigger value="completed">{t("learn.tab.completed")}</TabsTrigger>
         </TabsList>
         <TabsContent value="discover">
@@ -95,6 +103,9 @@ function LearnPage() {
         </TabsContent>
         <TabsContent value="list">
           <SavedList status="saved" emptyKey="learn.emptyList" />
+        </TabsContent>
+        <TabsContent value="in_progress">
+          <SavedList status="in_progress" emptyKey="learn.emptyInProgress" />
         </TabsContent>
         <TabsContent value="completed">
           <SavedList status="completed" emptyKey="learn.emptyCompleted" />
@@ -309,28 +320,39 @@ function ChoiceChip({
 
 function RecommendationCard({ rec }: { rec: Recommendation }) {
   const saveFn = useServerFn(saveLearningItem);
+  const startFn = useServerFn(startRecommendation);
   const qc = useQueryClient();
+
+  const payload = {
+    title: rec.title,
+    description: rec.description,
+    url: rec.url,
+    source: rec.source,
+    format: rec.format,
+    duration_minutes: rec.duration_minutes,
+    category: rec.category,
+    thumbnail_url: rec.thumbnail_url ?? null,
+  };
+
   const save = useMutation({
-    mutationFn: () =>
-      saveFn({
-        data: {
-          title: rec.title,
-          description: rec.description,
-          url: rec.url,
-          source: rec.source,
-          format: rec.format,
-          duration_minutes: rec.duration_minutes,
-          category: rec.category,
-          thumbnail_url: rec.thumbnail_url ?? null,
-          status: "saved",
-        },
-      }),
+    mutationFn: () => saveFn({ data: { ...payload, status: "saved" } }),
     onSuccess: () => {
       toast.success(t("learn.saved"));
       qc.invalidateQueries({ queryKey: ["learn-items"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const start = useMutation({
+    mutationFn: () => startFn({ data: { ...payload, status: "in_progress" } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleOpen = () => {
+    openExternal(rec.url);
+    start.mutate();
+  };
 
   const FormatIcon =
     rec.format === "video" ? Video : rec.format === "audio" ? Headphones : BookOpen;
@@ -362,10 +384,8 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
           <h4 className="mt-1.5 font-display text-lg leading-snug">{rec.title}</h4>
           <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <a href={rec.url} target="_blank" rel="noreferrer">
-                <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
-              </a>
+            <Button size="sm" onClick={handleOpen}>
+              <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
             </Button>
             <Button size="sm" variant="secondary" onClick={() => save.mutate()} disabled={save.isPending}>
               <Bookmark className="me-1.5 h-4 w-4" /> {t("learn.saveForLater")}
@@ -378,7 +398,7 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
 }
 
 // ---------- Saved list ----------
-function SavedList({ status, emptyKey }: { status: "saved" | "completed"; emptyKey: string }) {
+function SavedList({ status, emptyKey }: { status: "saved" | "in_progress" | "completed"; emptyKey: string }) {
   const listFn = useServerFn(listLearningItems);
   const items = useQuery({
     queryKey: ["learn-items", status],
@@ -415,7 +435,7 @@ type SavedItem = {
   duration_minutes: number | null;
   category: string | null;
   thumbnail_url: string | null;
-  status: "saved" | "completed" | "recommended" | "skipped";
+  status: "saved" | "in_progress" | "completed" | "recommended" | "skipped";
   reflection: string | null;
   completed_at: string | null;
 };
@@ -425,6 +445,7 @@ function SavedItemCard({ item }: { item: SavedItem }) {
   const qc = useQueryClient();
   const updateFn = useServerFn(updateLearningItem);
   const deleteFn = useServerFn(deleteLearningItem);
+  const startFn = useServerFn(markLearningItemStarted);
 
   const update = useMutation({
     mutationFn: (patch: Partial<SavedItem>) => updateFn({ data: { id: item.id, patch: patch as any } }),
@@ -439,10 +460,21 @@ function SavedItemCard({ item }: { item: SavedItem }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
   });
 
+  const markStarted = useMutation({
+    mutationFn: () => startFn({ data: { id: item.id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
+  });
+
+  const handleOpen = () => {
+    openExternal(item.url);
+    if (item.status !== "completed") markStarted.mutate();
+  };
+
   const FormatIcon =
     item.format === "video" ? Video : item.format === "audio" ? Headphones : BookOpen;
 
   const isCompleted = item.status === "completed";
+  const isInProgress = item.status === "in_progress";
 
   return (
     <Card className="p-5">
@@ -466,10 +498,8 @@ function SavedItemCard({ item }: { item: SavedItem }) {
           <h4 className="mt-1.5 font-display text-lg leading-snug">{item.title}</h4>
           {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <a href={item.url} target="_blank" rel="noreferrer">
-                <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
-              </a>
+            <Button size="sm" onClick={handleOpen}>
+              <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
             </Button>
             {isCompleted ? (
               <Button
@@ -490,10 +520,20 @@ function SavedItemCard({ item }: { item: SavedItem }) {
                 <Check className="me-1.5 h-4 w-4" /> {t("learn.markCompleted")}
               </Button>
             )}
+            {isInProgress && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => update.mutate({ status: "saved" })}
+              >
+                <Bookmark className="me-1.5 h-4 w-4" /> {t("learn.moveToList")}
+              </Button>
+            )}
             <Button size="sm" variant="ghost" onClick={() => del.mutate()} className="text-muted-foreground">
               {t("action.delete")}
             </Button>
           </div>
+
 
           {isCompleted && (
             <div className="mt-4 rounded-xl border bg-muted/30 p-3">
