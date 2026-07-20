@@ -286,7 +286,7 @@ const he: Dict = {
   "learn.markNotCompleted": "החזר לרשימה",
   "learn.reflectionPrompt": "מה לקחת מזה?",
   "learn.reflectionPlaceholder": "מחשבה, תובנה, משפט שנשאר איתך…",
-  "learn.saveReflection": "שמור רפלקציה",
+  "learn.saveReflection": "שמור מחשבה",
   "learn.reflectionSaved": "הרפלקציה נשמרה",
  "learn.tab.discover": "גלה",
  "learn.tab.list": "הרשימה שלי",
