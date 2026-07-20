@@ -320,28 +320,39 @@ function ChoiceChip({
 
 function RecommendationCard({ rec }: { rec: Recommendation }) {
   const saveFn = useServerFn(saveLearningItem);
+  const startFn = useServerFn(startRecommendation);
   const qc = useQueryClient();
+
+  const payload = {
+    title: rec.title,
+    description: rec.description,
+    url: rec.url,
+    source: rec.source,
+    format: rec.format,
+    duration_minutes: rec.duration_minutes,
+    category: rec.category,
+    thumbnail_url: rec.thumbnail_url ?? null,
+  };
+
   const save = useMutation({
-    mutationFn: () =>
-      saveFn({
-        data: {
-          title: rec.title,
-          description: rec.description,
-          url: rec.url,
-          source: rec.source,
-          format: rec.format,
-          duration_minutes: rec.duration_minutes,
-          category: rec.category,
-          thumbnail_url: rec.thumbnail_url ?? null,
-          status: "saved",
-        },
-      }),
+    mutationFn: () => saveFn({ data: { ...payload, status: "saved" } }),
     onSuccess: () => {
       toast.success(t("learn.saved"));
       qc.invalidateQueries({ queryKey: ["learn-items"] });
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
+  const start = useMutation({
+    mutationFn: () => startFn({ data: { ...payload, status: "in_progress" } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
+    onError: (e: Error) => toast.error(e.message),
+  });
+
+  const handleOpen = () => {
+    openExternal(rec.url);
+    start.mutate();
+  };
 
   const FormatIcon =
     rec.format === "video" ? Video : rec.format === "audio" ? Headphones : BookOpen;
@@ -373,10 +384,8 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
           <h4 className="mt-1.5 font-display text-lg leading-snug">{rec.title}</h4>
           <p className="mt-1 text-sm text-muted-foreground">{rec.description}</p>
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <a href={rec.url} target="_blank" rel="noreferrer">
-                <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
-              </a>
+            <Button size="sm" onClick={handleOpen}>
+              <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
             </Button>
             <Button size="sm" variant="secondary" onClick={() => save.mutate()} disabled={save.isPending}>
               <Bookmark className="me-1.5 h-4 w-4" /> {t("learn.saveForLater")}
