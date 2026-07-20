@@ -54,7 +54,10 @@ const itemInput = z.object({
   url: z.string().url(),
   source: z.string().nullable().optional(),
   format: formatEnum,
-  duration_minutes: z.number().int().positive().nullable().optional(),
+  duration_minutes: z.preprocess(
+    (v) => (typeof v === "number" ? Math.round(v) : v),
+    z.number().int().positive().nullable().optional(),
+  ),
   category: z.string().nullable().optional(),
   thumbnail_url: z.string().nullable().optional(),
   status: statusEnum.default("saved"),
