@@ -100,6 +100,7 @@ export const updateLearningItem = createServerFn({ method: "POST" })
             status: statusEnum.optional(),
             reflection: z.string().nullable().optional(),
             completed_at: z.string().nullable().optional(),
+            rating: z.union([z.literal(-1), z.literal(1), z.literal(2)]).nullable().optional(),
           })
           .partial(),
       })
@@ -115,6 +116,7 @@ export const updateLearningItem = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return row;
   });
+
 
 export const deleteLearningItem = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
