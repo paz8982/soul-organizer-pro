@@ -389,7 +389,7 @@ function RecommendationCard({ rec }: { rec: Recommendation }) {
 }
 
 // ---------- Saved list ----------
-function SavedList({ status, emptyKey }: { status: "saved" | "completed"; emptyKey: string }) {
+function SavedList({ status, emptyKey }: { status: "saved" | "in_progress" | "completed"; emptyKey: string }) {
   const listFn = useServerFn(listLearningItems);
   const items = useQuery({
     queryKey: ["learn-items", status],
