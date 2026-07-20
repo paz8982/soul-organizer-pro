@@ -282,7 +282,12 @@ export type Database = {
     Enums: {
       archive_item_type: "file" | "link" | "note" | "image" | "pdf" | "doc"
       learning_format: "video" | "audio" | "text"
-      learning_status: "recommended" | "saved" | "completed" | "skipped"
+      learning_status:
+        | "recommended"
+        | "saved"
+        | "completed"
+        | "skipped"
+        | "in_progress"
       task_priority: "high" | "medium" | "low"
       task_status: "active" | "completed"
     }
@@ -414,7 +419,13 @@ export const Constants = {
     Enums: {
       archive_item_type: ["file", "link", "note", "image", "pdf", "doc"],
       learning_format: ["video", "audio", "text"],
-      learning_status: ["recommended", "saved", "completed", "skipped"],
+      learning_status: [
+        "recommended",
+        "saved",
+        "completed",
+        "skipped",
+        "in_progress",
+      ],
       task_priority: ["high", "medium", "low"],
       task_status: ["active", "completed"],
     },
