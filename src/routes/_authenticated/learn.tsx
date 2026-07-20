@@ -30,12 +30,19 @@ import {
   deleteLearningItem,
   listLearningCategories,
   listLearningItems,
+  markLearningItemStarted,
   recommendLearning,
   saveLearningItem,
+  startRecommendation,
   updateLearningItem,
   type LearningFormat,
   type Recommendation,
 } from "@/lib/learning.functions";
+
+function openExternal(url: string) {
+  // Force the system browser even inside the installed PWA on Android.
+  window.open(url, "_blank", "noopener,noreferrer");
+}
 
 export const Route = createFileRoute("/_authenticated/learn")({
   component: LearnPage,
