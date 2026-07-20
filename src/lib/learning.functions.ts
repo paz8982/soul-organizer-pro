@@ -6,7 +6,7 @@ const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 const client = (ctx: { supabase: unknown }) => ctx.supabase as any;
 
 const formatEnum = z.enum(["video", "audio", "text"]);
-const statusEnum = z.enum(["recommended", "saved", "completed", "skipped"]);
+const statusEnum = z.enum(["recommended", "saved", "in_progress", "completed", "skipped"]);
 
 export type LearningFormat = z.infer<typeof formatEnum>;
 export type LearningStatus = z.infer<typeof statusEnum>;
