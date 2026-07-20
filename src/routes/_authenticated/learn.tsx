@@ -591,6 +591,14 @@ function SavedItemCard({ item }: { item: SavedItem }) {
 
 
           {isCompleted && (
+            <RatingRow
+              value={item.rating ?? null}
+              disabled={update.isPending}
+              onChange={(v) => update.mutate({ rating: v })}
+            />
+          )}
+
+          {isCompleted && (
             <div className="mt-4 rounded-xl border bg-muted/30 p-3">
               <p className="mb-2 text-sm font-medium">{t("learn.reflectionPrompt")}</p>
               <Textarea
