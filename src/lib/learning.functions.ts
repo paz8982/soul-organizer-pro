@@ -139,17 +139,17 @@ export const recommendLearning = createServerFn({ method: "POST" })
 
     const sys =
       data.locale === "he"
-        ? `אתה עוזר שממליץ על תכנים איכותיים ללמידה קצרה. החזר 3 המלצות שונות ואמיתיות ככל האפשר.
+        ? `אתה עוזר שממליץ על תכנים איכותיים ללמידה קצרה. החזר 5 המלצות שונות ואמיתיות ככל האפשר.
 - format: ${data.format} (video=YouTube/TED, audio=Podcast/Spotify, text=article/blog)
 - קטגוריה: ${data.category}
-- משך: כ-${data.duration_minutes} דקות (התאם).
-כל המלצה: כותרת ותיאור קצר בעברית טבעית, מקור אמין (TED / YouTube / Spotify / Medium / HBR וכו'), URL שעובד אם ידוע לך (אחרת קישור חיפוש רלוונטי ב-google/youtube), duration_minutes מספרי, category.
+- משך: חובה שהאורך המלא של הפריט יהיה קטן או שווה ל-${data.duration_minutes} דקות. אל תמליץ על פריט ארוך יותר גם אם הסדרה/הערוץ מתאימים. עבור פודקאסטים בחר פרק ספציפי קצר; עבור וידאו בחר קליפ קצר / TED-Ed / Short; עבור טקסט בחר כתבה שזמן הקריאה שלה מתאים.
+כל המלצה: כותרת ותיאור קצר בעברית טבעית, מקור אמין, URL ישיר לפריט הספציפי (לא לערוץ/סדרה), duration_minutes מספרי המשקף את האורך האמיתי, category.
 החזר JSON בלבד לפי הסכימה.`
-        : `Recommend 3 diverse high-quality short-learning items.
+        : `Recommend 5 diverse high-quality short-learning items.
 - format: ${data.format} (video=YouTube/TED, audio=Podcast/Spotify, text=article/blog)
 - category: ${data.category}
-- duration: about ${data.duration_minutes} minutes.
-Each item: concise title & description, credible source, working URL if you know one (otherwise a relevant search URL on youtube/google), numeric duration_minutes, category.
+- duration: the item's full length MUST be ≤ ${data.duration_minutes} minutes. Never recommend a longer item, even if the channel/series is a great match. For podcasts pick a specific short episode; for video pick a short clip / TED-Ed / Short; for text pick an article whose read time fits.
+Each item: concise title & description, credible source, DIRECT URL to the specific item (not the channel/series), numeric duration_minutes reflecting the real length, category.
 Return JSON only per schema.`;
 
     const res = await fetch(`${GATEWAY}/chat/completions`, {
