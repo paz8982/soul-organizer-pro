@@ -95,6 +95,7 @@ function LearnPage() {
         <TabsList className="mb-6">
           <TabsTrigger value="discover">{t("learn.tab.discover")}</TabsTrigger>
           <TabsTrigger value="list">{t("learn.tab.list")}</TabsTrigger>
+          <TabsTrigger value="in_progress">{t("learn.tab.inProgress")}</TabsTrigger>
           <TabsTrigger value="completed">{t("learn.tab.completed")}</TabsTrigger>
         </TabsList>
         <TabsContent value="discover">
@@ -102,6 +103,9 @@ function LearnPage() {
         </TabsContent>
         <TabsContent value="list">
           <SavedList status="saved" emptyKey="learn.emptyList" />
+        </TabsContent>
+        <TabsContent value="in_progress">
+          <SavedList status="in_progress" emptyKey="learn.emptyInProgress" />
         </TabsContent>
         <TabsContent value="completed">
           <SavedList status="completed" emptyKey="learn.emptyCompleted" />
