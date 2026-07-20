@@ -440,7 +440,60 @@ type SavedItem = {
   status: "saved" | "in_progress" | "completed" | "recommended" | "skipped";
   reflection: string | null;
   completed_at: string | null;
+  rating: number | null;
 };
+
+function RatingRow({
+  value,
+  onChange,
+  disabled,
+}: {
+  value: number | null;
+  onChange: (v: number) => void;
+  disabled?: boolean;
+}) {
+  const options: { v: -1 | 1 | 2; icon: React.ReactNode; labelKey: string }[] = [
+    { v: -1, icon: <ThumbsDown className="h-4 w-4" />, labelKey: "learn.rate.disliked" },
+    { v: 1, icon: <ThumbsUp className="h-4 w-4" />, labelKey: "learn.rate.liked" },
+    {
+      v: 2,
+      icon: (
+        <span className="flex items-center">
+          <ThumbsUp className="h-4 w-4" />
+          <ThumbsUp className="-ms-1 h-4 w-4" />
+        </span>
+      ),
+      labelKey: "learn.rate.loved",
+    },
+  ];
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border bg-muted/30 p-2">
+      <span className="ms-1 text-sm text-muted-foreground">{t("learn.rate.prompt")}</span>
+      {options.map((o) => {
+        const active = value === o.v;
+        return (
+          <button
+            key={o.v}
+            type="button"
+            aria-label={t(o.labelKey)}
+            title={t(o.labelKey)}
+            disabled={disabled}
+            onClick={() => onChange(o.v)}
+            className={cn(
+              "grid h-8 w-10 place-items-center rounded-lg border transition-colors",
+              active
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-input bg-background text-muted-foreground hover:bg-muted",
+            )}
+          >
+            {o.icon}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 
 function SavedItemCard({ item }: { item: SavedItem }) {
   const [reflection, setReflection] = useState(item.reflection ?? "");
