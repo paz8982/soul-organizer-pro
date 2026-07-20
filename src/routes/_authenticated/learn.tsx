@@ -426,7 +426,7 @@ type SavedItem = {
   duration_minutes: number | null;
   category: string | null;
   thumbnail_url: string | null;
-  status: "saved" | "completed" | "recommended" | "skipped";
+  status: "saved" | "in_progress" | "completed" | "recommended" | "skipped";
   reflection: string | null;
   completed_at: string | null;
 };
