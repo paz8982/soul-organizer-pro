@@ -15,6 +15,8 @@ import {
   Plus,
   Loader2,
   RotateCcw,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { PageHeader, EmptyState } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
