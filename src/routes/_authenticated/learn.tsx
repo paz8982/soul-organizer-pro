@@ -445,6 +445,7 @@ function SavedItemCard({ item }: { item: SavedItem }) {
   const qc = useQueryClient();
   const updateFn = useServerFn(updateLearningItem);
   const deleteFn = useServerFn(deleteLearningItem);
+  const startFn = useServerFn(markLearningItemStarted);
 
   const update = useMutation({
     mutationFn: (patch: Partial<SavedItem>) => updateFn({ data: { id: item.id, patch: patch as any } }),
@@ -459,10 +460,21 @@ function SavedItemCard({ item }: { item: SavedItem }) {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
   });
 
+  const markStarted = useMutation({
+    mutationFn: () => startFn({ data: { id: item.id } }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["learn-items"] }),
+  });
+
+  const handleOpen = () => {
+    openExternal(item.url);
+    if (item.status !== "completed") markStarted.mutate();
+  };
+
   const FormatIcon =
     item.format === "video" ? Video : item.format === "audio" ? Headphones : BookOpen;
 
   const isCompleted = item.status === "completed";
+  const isInProgress = item.status === "in_progress";
 
   return (
     <Card className="p-5">
@@ -486,10 +498,8 @@ function SavedItemCard({ item }: { item: SavedItem }) {
           <h4 className="mt-1.5 font-display text-lg leading-snug">{item.title}</h4>
           {item.description && <p className="mt-1 text-sm text-muted-foreground">{item.description}</p>}
           <div className="mt-3 flex flex-wrap gap-2">
-            <Button asChild size="sm">
-              <a href={item.url} target="_blank" rel="noreferrer">
-                <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
-              </a>
+            <Button size="sm" onClick={handleOpen}>
+              <ExternalLink className="me-1.5 h-4 w-4" /> {t("learn.openContent")}
             </Button>
             {isCompleted ? (
               <Button
@@ -510,10 +520,20 @@ function SavedItemCard({ item }: { item: SavedItem }) {
                 <Check className="me-1.5 h-4 w-4" /> {t("learn.markCompleted")}
               </Button>
             )}
+            {isInProgress && (
+              <Button
+                size="sm"
+                variant="ghost"
+                onClick={() => update.mutate({ status: "saved" })}
+              >
+                <Bookmark className="me-1.5 h-4 w-4" /> {t("learn.moveToList")}
+              </Button>
+            )}
             <Button size="sm" variant="ghost" onClick={() => del.mutate()} className="text-muted-foreground">
               {t("action.delete")}
             </Button>
           </div>
+
 
           {isCompleted && (
             <div className="mt-4 rounded-xl border bg-muted/30 p-3">
