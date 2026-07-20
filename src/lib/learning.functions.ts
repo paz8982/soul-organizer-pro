@@ -218,13 +218,53 @@ Return JSON only per schema.`;
       parsed = { items: [] };
     }
 
-    // Validate URLs so we never surface dead / removed media.
-    const candidates = (parsed.items ?? []).slice(0, 8);
+    // Enforce duration budget then validate URLs so we never surface dead / removed media
+    // or items longer than the user's requested time.
+    const maxMinutes = data.duration_minutes + 1; // small tolerance
+    const candidates = (parsed.items ?? [])
+      .filter((it) => typeof it.duration_minutes === "number" && it.duration_minutes <= maxMinutes)
+      .slice(0, 8);
     const checked = await Promise.all(
       candidates.map(async (item) => ((await isUrlAvailable(item.url)) ? item : null)),
     );
-    const available = checked.filter((x): x is Recommendation => x !== null).slice(0, 5);
+    const available = checked.filter((x): x is Recommendation => x !== null).slice(0, 3);
     return { items: available };
+  });
+
+// ---------- In-progress helpers ----------
+export const markLearningItemStarted = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => z.object({ id: z.string().uuid() }).parse(data))
+  .handler(async ({ data, context }) => {
+    // Don't downgrade a completed item; just bump updated_at on it.
+    const { data: existing, error: fetchErr } = await client(context)
+      .from("learning_items")
+      .select("status")
+      .eq("id", data.id)
+      .single();
+    if (fetchErr) throw new Error(fetchErr.message);
+    const nextStatus = existing?.status === "completed" ? "completed" : "in_progress";
+    const { data: row, error } = await client(context)
+      .from("learning_items")
+      .update({ status: nextStatus })
+      .eq("id", data.id)
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const startRecommendation = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((data: unknown) => itemInput.parse(data))
+  .handler(async ({ data, context }) => {
+    const { data: row, error } = await client(context)
+      .from("learning_items")
+      .insert({ ...data, status: "in_progress", user_id: context.userId })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
   });
 
 // ---------- URL availability ----------
