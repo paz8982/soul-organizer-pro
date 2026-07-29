@@ -227,6 +227,14 @@ const he: Dict = {
   "archive.fetching": "טוען פרטים מהקישור…",
   "archive.fetched": "הפרטים הושלמו",
   "archive.fetchFailed": "לא הצלחתי לטעון פרטים מהקישור",
+  "archive.smartSearch": "חיפוש חכם",
+  "archive.smartSearchPlaceholder": "שאל שאלה — למשל: כל מתכוני הפסטה שלי",
+  "archive.smartSearching": "מחפש בתוך הקישורים והקבצים…",
+  "archive.smartNoResults": "לא מצאתי פריטים שמתאימים לשאלה",
+  "archive.smartFailed": "החיפוש החכם נכשל, נסה שוב",
+  "archive.smartClear": "ניקוי החיפוש החכם",
+  "archive.smartHint": "חיפוש חכם קורא את התוכן שבתוך הקישורים והקבצים.",
+
 
 
   "auth.subtitle": "מקום שקט אחד למשימות, יומן וארכיון.",
