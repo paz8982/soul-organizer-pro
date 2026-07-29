@@ -23,6 +23,7 @@ import { Route as AuthenticatedJournalNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedJournalIdRouteImport } from './routes/_authenticated/journal.$id'
 import { Route as AuthenticatedArchiveNewRouteImport } from './routes/_authenticated/archive.new'
 import { Route as AuthenticatedArchiveIdRouteImport } from './routes/_authenticated/archive.$id'
+import { Route as ApiPublicWearVoiceRouteImport } from './routes/api/public/wear/voice'
 
 const CaptureRoute = CaptureRouteImport.update({
   id: '/capture',
@@ -95,6 +96,11 @@ const AuthenticatedArchiveIdRoute = AuthenticatedArchiveIdRouteImport.update({
   path: '/archive/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const ApiPublicWearVoiceRoute = ApiPublicWearVoiceRouteImport.update({
+  id: '/api/public/wear/voice',
+  path: '/api/public/wear/voice',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -110,6 +116,7 @@ export interface FileRoutesByFullPath {
   '/journal/new': typeof AuthenticatedJournalNewRoute
   '/archive/': typeof AuthenticatedArchiveIndexRoute
   '/journal/': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -125,6 +132,7 @@ export interface FileRoutesByTo {
   '/journal/new': typeof AuthenticatedJournalNewRoute
   '/archive': typeof AuthenticatedArchiveIndexRoute
   '/journal': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -142,6 +150,7 @@ export interface FileRoutesById {
   '/_authenticated/journal/new': typeof AuthenticatedJournalNewRoute
   '/_authenticated/archive/': typeof AuthenticatedArchiveIndexRoute
   '/_authenticated/journal/': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,6 +168,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/archive/'
     | '/journal/'
+    | '/api/public/wear/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/archive'
     | '/journal'
+    | '/api/public/wear/voice'
   id:
     | '__root__'
     | '/'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journal/new'
     | '/_authenticated/archive/'
     | '/_authenticated/journal/'
+    | '/api/public/wear/voice'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -197,6 +209,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CaptureRoute: typeof CaptureRoute
+  ApiPublicWearVoiceRoute: typeof ApiPublicWearVoiceRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedArchiveIdRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/api/public/wear/voice': {
+      id: '/api/public/wear/voice'
+      path: '/api/public/wear/voice'
+      fullPath: '/api/public/wear/voice'
+      preLoaderRoute: typeof ApiPublicWearVoiceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -336,17 +356,8 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CaptureRoute: CaptureRoute,
+  ApiPublicWearVoiceRoute: ApiPublicWearVoiceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

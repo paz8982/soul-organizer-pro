@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Soul Voice</string>
+    <string name="pairing_title">Pairing</string>
+    <string name="tap_to_record">Tap to record</string>
+    <string name="recording">Recording…</string>
+    <string name="processing">Sending…</string>
+    <string name="done">Done</string>
+    <string name="error">Could not send. Try again.</string>
+    <string name="pairing_code">Pairing code</string>
+    <string name="pairing_hint">Paste the code from Settings → Wear OS in your Soul Organizer app.</string>
+    <string name="pairing_button">Pair watch</string>
+    <string name="paired">Paired</string>
+    <string name="pairing_failed">Pairing failed</string>
+    <string name="open_phone">Open phone</string>
+</resources>
