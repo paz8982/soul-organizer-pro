@@ -566,6 +566,7 @@ const en: Dict = {
   "settings.wearTokenWarning": "This code is shown only once. Copy it to your watch.",
   "settings.wearTokenCopied": "Code copied",
   "settings.wearRevoke": "Unpair",
+  "settings.wearRevoke": "Unpair",
   "settings.wearRevokeConfirm": "Unpair this watch?",
   "settings.wearEnabled": "Active",
   "settings.wearDisabled": "Disabled",
