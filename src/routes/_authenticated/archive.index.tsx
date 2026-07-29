@@ -88,11 +88,17 @@ function ArchivePage() {
         title={t("archive.title")}
         description={t("archive.subtitle")}
         action={
-          <Button onClick={() => navigate({ to: "/archive/new" })}>
-            <Plus className="ms-1.5 h-4 w-4" /> {t("archive.save")}
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => navigate({ to: "/archive/import" })}>
+              <MessageCircle className="ms-1.5 h-4 w-4" /> {t("archive.import")}
+            </Button>
+            <Button onClick={() => navigate({ to: "/archive/new" })}>
+              <Plus className="ms-1.5 h-4 w-4" /> {t("archive.save")}
+            </Button>
+          </div>
         }
       />
+
 
       <div className="mb-2 flex flex-wrap gap-2">
         <div className="relative min-w-0 flex-1">
