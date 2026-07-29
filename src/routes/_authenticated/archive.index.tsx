@@ -8,7 +8,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, Archive as ArchiveIcon, Link as LinkIcon, FileText, Image as ImageIcon, File, Sparkles, Loader2, X } from "lucide-react";
+import { Plus, Search, Archive as ArchiveIcon, Link as LinkIcon, FileText, Image as ImageIcon, File, Sparkles, Loader2, X, MessageCircle } from "lucide-react";
 import { t, itemTypeLabel, useLocale } from "@/lib/i18n";
 
 const archiveQuery = queryOptions({
