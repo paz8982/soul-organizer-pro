@@ -555,6 +555,28 @@ const en: Dict = {
   "archive.smartFailed": "Smart search failed, please try again",
   "archive.smartClear": "Clear smart search",
   "archive.smartHint": "Smart search reads the content inside your links and files.",
+  "archive.import": "Import from WhatsApp",
+  "import.title": "Import from WhatsApp",
+  "import.subtitle": "Upload a chat export and every link lands in your archive.",
+  "import.step1": "In WhatsApp: open the chat → ⋮ menu → More → Export chat → Without media",
+  "import.step2": "Save the file to your phone (ZIP or TXT)",
+  "import.step3": "Upload it here, pick what to import and confirm",
+  "import.pickFile": "Choose the export file",
+  "import.pickFileHint": "A ZIP or _chat.txt file",
+  "import.noLinks": "No links found in that file",
+  "import.parseFailed": "Couldn't read that file",
+  "import.found": "{n} links found",
+  "import.selected": "{n} selected",
+  "import.selectAll": "Select all",
+  "import.selectNone": "Clear selection",
+  "import.duplicate": "Already saved",
+  "import.enrich": "Auto-fill titles and tags (slower)",
+  "import.enriching": "Enriching… {d} of {t}",
+  "import.run": "Import {n} items",
+  "import.reset": "Choose another file",
+  "import.done": "Imported {n} items ({s} skipped)",
+  "import.failed": "Import failed, try again",
+
 
 
 
