@@ -275,7 +275,6 @@ const he: Dict = {
   "settings.wearTokenWarning": "הקוד יופיע פעם אחת בלבד. העתק אותו לשעון.",
   "settings.wearTokenCopied": "הקוד הועתק",
   "settings.wearRevoke": "ביטול חיבור",
-  "settings.wearRevoke": "ביטול חיבור",
   "settings.wearRevokeConfirm": "לבטל את החיבור לשעון?",
   "settings.wearEnabled": "פעיל",
   "settings.wearDisabled": "מושבת",
