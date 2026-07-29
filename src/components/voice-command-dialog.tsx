@@ -160,7 +160,7 @@ export function VoiceCommandDialog({
     }
     if (action.type === "search_archive") {
       onOpenChange(false);
-      navigate({ to: "/archive", search: { q: action.query } as any });
+      navigate({ to: "/archive", search: { q: action.query, smart: true } as any });
       return;
     }
     toast.error(
