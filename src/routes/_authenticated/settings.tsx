@@ -232,6 +232,7 @@ function WearDeviceRow({ device }: { device: WearDevice }) {
         <Button
           variant="ghost"
           size="icon"
+          aria-label={t("settings.wearRevoke")}
           onClick={() => {
             if (confirm(t("settings.wearRevokeConfirm"))) remove.mutate();
           }}
