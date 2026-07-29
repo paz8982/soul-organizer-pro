@@ -526,6 +526,14 @@ const en: Dict = {
   "archive.fetching": "Fetching link details…",
   "archive.fetched": "Details filled in",
   "archive.fetchFailed": "Couldn't fetch details from that link",
+  "archive.smartSearch": "Smart search",
+  "archive.smartSearchPlaceholder": "Ask a question — e.g. all my pasta recipes",
+  "archive.smartSearching": "Searching inside your links and files…",
+  "archive.smartNoResults": "No items matched that question",
+  "archive.smartFailed": "Smart search failed, please try again",
+  "archive.smartClear": "Clear smart search",
+  "archive.smartHint": "Smart search reads the content inside your links and files.",
+
 
 
   "auth.subtitle": "One quiet place for tasks, journal and archive.",
