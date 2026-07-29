@@ -34,6 +34,9 @@ export type Database = {
       }
       archive_items: {
         Row: {
+          content_indexed_at: string | null
+          content_status: string
+          content_text: string | null
           created_at: string
           description: string | null
           file_mime: string | null
@@ -50,6 +53,9 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          content_indexed_at?: string | null
+          content_status?: string
+          content_text?: string | null
           created_at?: string
           description?: string | null
           file_mime?: string | null
@@ -66,6 +72,9 @@ export type Database = {
           user_id: string
         }
         Update: {
+          content_indexed_at?: string | null
+          content_status?: string
+          content_text?: string | null
           created_at?: string
           description?: string | null
           file_mime?: string | null
