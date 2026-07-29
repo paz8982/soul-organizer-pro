@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { createArchiveItem } from "@/lib/archive.functions";
+import { indexArchiveItem } from "@/lib/archive-search.functions";
+
 import { enrichLink } from "@/lib/link-enrich.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
