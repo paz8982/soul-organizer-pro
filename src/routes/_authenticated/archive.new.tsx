@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState, useRef } from "react";
 import { z } from "zod";
 import { createArchiveItem } from "@/lib/archive.functions";
+import { indexArchiveItem } from "@/lib/archive-search.functions";
+
 import { enrichLink } from "@/lib/link-enrich.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
@@ -132,8 +134,11 @@ function NewArchiveItem() {
     onSuccess: (row: any) => {
       qc.invalidateQueries();
       toast.success(t("archive.saved"));
+      // Fire-and-forget: extract searchable content for AI smart search.
+      void indexArchiveItem({ data: { id: row.id } }).catch(() => {});
       navigate({ to: "/archive/$id", params: { id: row.id } });
     },
+
     onError: (e) => {
       toast.error(e instanceof Error ? e.message : t("action.failed"));
       setUploading(false);
