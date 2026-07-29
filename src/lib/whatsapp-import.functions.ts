@@ -52,16 +52,21 @@ export const importWhatsappLinks = createServerFn({ method: "POST" })
         seen.add(i.url);
         return true;
       })
-      .map((i) => ({
-        user_id: context.userId,
-        title: i.title.slice(0, 500),
-        notes: i.notes || null,
-        url: i.url,
-        item_type: "link" as const,
-        tags: [] as string[],
-        source: "whatsapp",
-        ...(i.created_at ? { created_at: i.created_at } : {}),
-      }));
+      .map((i) => {
+        const ts = i.created_at ? new Date(i.created_at) : null;
+        const createdAt =
+          ts && !Number.isNaN(ts.getTime()) ? ts.toISOString() : new Date().toISOString();
+        return {
+          user_id: context.userId,
+          title: i.title.slice(0, 500),
+          notes: i.notes || null,
+          url: i.url,
+          item_type: "link" as const,
+          tags: [] as string[],
+          source: "whatsapp",
+          created_at: createdAt,
+        };
+      });
 
     if (rows.length === 0) return { inserted: [], skipped: data.items.length };
 
