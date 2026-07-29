@@ -234,6 +234,28 @@ const he: Dict = {
   "archive.smartFailed": "החיפוש החכם נכשל, נסה שוב",
   "archive.smartClear": "ניקוי החיפוש החכם",
   "archive.smartHint": "חיפוש חכם קורא את התוכן שבתוך הקישורים והקבצים.",
+  "archive.import": "ייבוא מוואטסאפ",
+  "import.title": "ייבוא מוואטסאפ",
+  "import.subtitle": "העלה ייצוא של צ'אט וכל הקישורים ייכנסו לארכיון.",
+  "import.step1": "בוואטסאפ: פתח את הצ'אט → תפריט ⋮ → עוד → ייצוא צ'אט → בלי מדיה",
+  "import.step2": "שמור את הקובץ בטלפון (ZIP או TXT)",
+  "import.step3": "העלה אותו כאן, בחר מה לייבא ואשר",
+  "import.pickFile": "בחירת קובץ הייצוא",
+  "import.pickFileHint": "קובץ ZIP או _chat.txt",
+  "import.noLinks": "לא נמצאו קישורים בקובץ",
+  "import.parseFailed": "לא הצלחתי לקרוא את הקובץ",
+  "import.found": "נמצאו {n} קישורים",
+  "import.selected": "נבחרו {n}",
+  "import.selectAll": "בחר הכול",
+  "import.selectNone": "נקה בחירה",
+  "import.duplicate": "כבר בארכיון",
+  "import.enrich": "השלם כותרות ותגיות אוטומטית (איטי יותר)",
+  "import.enriching": "משלים פרטים… {d} מתוך {t}",
+  "import.run": "ייבוא {n} פריטים",
+  "import.reset": "בחירת קובץ אחר",
+  "import.done": "יובאו {n} פריטים ({s} דילוגים)",
+  "import.failed": "הייבוא נכשל, נסה שוב",
+
 
 
 
