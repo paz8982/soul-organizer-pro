@@ -18,7 +18,13 @@ class PairingActivity : FragmentActivity() {
         val pairButton = findViewById<Button>(R.id.pairButton)
 
         urlInput.setText(SoulApi.getBaseUrl())
-        tokenInput.filters = arrayOf(InputFilter.LengthFilter(6), InputFilter.AllCaps())
+        tokenInput.filters = arrayOf(
+            InputFilter.LengthFilter(6),
+            InputFilter.AllCaps(),
+            InputFilter { source, _, _, _, _, _ ->
+                source.filter { it.isLetter() }
+            },
+        )
 
         pairButton.setOnClickListener {
             val code = tokenInput.text.toString().trim().uppercase()
