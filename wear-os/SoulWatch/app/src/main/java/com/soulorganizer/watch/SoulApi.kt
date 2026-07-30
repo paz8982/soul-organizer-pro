@@ -56,6 +56,40 @@ object SoulApi {
         prefs.edit().remove(KEY_TOKEN).apply()
     }
 
+    /**
+     * Exchanges a short 6-character pairing code for the long device token.
+     * The long token is stored locally and used for every voice upload.
+     */
+    fun pairWithCode(code: String, baseUrl: String, onResult: (Boolean, String?) -> Unit) {
+        val normalized = code.trim().uppercase()
+        val url = "${baseUrl.trimEnd('/')}/api/public/wear/pair"
+        val body = okhttp3.RequestBody.create(
+            "application/json".toMediaTypeOrNull(),
+            """{"code":"$normalized"}""",
+        )
+        val request = Request.Builder().url(url).post(body).build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onResult(false, e.message)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val json = response.body?.string() ?: "{}"
+                val token = Regex(""""token"\s*:\s*"([^"]+)"""").find(json)?.groupValues?.get(1)
+                if (response.isSuccessful && token != null) {
+                    setBaseUrl(baseUrl.trimEnd('/'))
+                    setToken(token)
+                    onResult(true, null)
+                } else {
+                    val error = Regex(""""error"\s*:\s*"([^"]*)"""").find(json)?.groupValues?.get(1)
+                    onResult(false, error ?: "Pairing failed")
+                }
+            }
+        })
+    }
+
+
     fun sendVoiceRecording(
         file: File,
         locale: String,
