@@ -214,11 +214,11 @@ function ArchivePage() {
 
         {/* Tag chips in tags mode */}
         {mode === "tags" && (
-          <div className="flex flex-wrap gap-1.5">
-            {visibleTags.length === 0 ? (
+          <div className="flex flex-wrap items-center gap-1.5">
+            {shownTags.length === 0 ? (
               <p className="text-xs text-muted-foreground">{t("archive.noTags")}</p>
             ) : (
-              visibleTags.map((tag) => (
+              shownTags.map((tag) => (
                 <button
                   key={tag}
                   onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
@@ -231,6 +231,11 @@ function ArchivePage() {
                   #{tag}
                 </button>
               ))
+            )}
+            {remainingTags > 0 && (
+              <span className="text-xs text-muted-foreground">
+                +{remainingTags} {t("archive.moreTags")}
+              </span>
             )}
           </div>
         )}
