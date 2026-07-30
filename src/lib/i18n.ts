@@ -624,7 +624,7 @@ const en: Dict = {
   "settings.wearDeviceLabelHint": "e.g. My Galaxy Watch",
   "settings.wearGenerateToken": "Generate pairing code",
   "settings.wearTokenGenerated": "Pairing code generated",
-  "settings.wearTokenWarning": "This code is shown only once. Copy it to your watch.",
+  "settings.wearTokenWarning": "Type this 6-character code on your watch. Valid for 10 minutes, single use.",
   "settings.wearTokenCopied": "Code copied",
   "settings.wearRevoke": "Unpair",
   "settings.wearRevokeConfirm": "Unpair this watch?",
