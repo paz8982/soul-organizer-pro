@@ -96,11 +96,11 @@ function ArchivePage() {
     if (type !== "all" && i.item_type !== type) return false;
     if (mode === "tags" && selectedTag && !i.tags?.includes(selectedTag)) return false;
     if (mode === "text" && search.trim()) {
-      const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean);
-      if (terms.length) {
-        const text = `${i.title} ${i.description ?? ""} ${i.notes ?? ""}`.toLowerCase();
-        if (!terms.every((term) => text.includes(term))) return false;
-      }
+        const terms = search.trim().toLowerCase().split(/\s+/).filter(Boolean) as string[];
+        if (terms.length) {
+          const text = `${i.title} ${i.description ?? ""} ${i.notes ?? ""}`.toLowerCase();
+          if (!terms.every((term: string) => text.includes(term))) return false;
+        }
     }
     return true;
   });
