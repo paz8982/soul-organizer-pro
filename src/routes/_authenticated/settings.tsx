@@ -260,7 +260,7 @@ function PairingDialog({
   const generate = useMutation({
     mutationFn: () => createWearDevice({ data: { label: label || t("settings.wearDeviceLabelHint") } }),
     onSuccess: (data) => {
-      setToken(data.token);
+      setToken(data.code);
       qc.invalidateQueries({ queryKey: ["wear_devices"] });
       toast.success(t("settings.wearTokenGenerated"));
     },
