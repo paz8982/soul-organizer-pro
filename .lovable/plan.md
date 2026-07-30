@@ -1,32 +1,38 @@
-# 6-Letter Watch Pairing Code
+## Groceries (רשימת קניות)
 
-Today the app shows a 64-character device token that must be typed on the watch. Instead, the app will show a short **6-letter code** (uppercase letters only, e.g. `KAQMBX`), valid for 10 minutes and single-use. The watch types the short code once, exchanges it behind the scenes for the real long token, and stores that token permanently. Security stays the same because the long secret never has to be typed.
+A new section alongside Tasks/Journal/Archive, in Hebrew + English, RTL-safe.
 
-## Flow
+### What you get
+- **Add** items fast: one input for the name + a small quantity field (defaults to 1).
+- **Check off**: tap an item to mark it as bought — it stays on the list with a strikethrough and moves to the bottom. Tap again to un-check.
+- **Delete**: X button on each row removes it permanently. A "נקה שנקנו / Clear bought" button clears all checked items at once.
+- **Export**: a share button opens the Android share sheet with the list as plain text, so you can send it to Google Keep, WhatsApp, Gmail, etc. On desktop (no share support) it falls back to copying the text to the clipboard with a toast confirmation.
 
+Note on Google Keep: Google has no public API for creating notes from a web app, so a direct "save to Keep" button isn't possible. The share sheet on Android lists Keep as a target, which is the closest equivalent — one tap and the list lands in a new Keep note.
+
+Exported text looks like:
 ```text
-App (Settings → Wear OS)        Watch                        Server
-  "Pair new watch"  ──────────────────────────────► create device + long token
-        shows  K7Q2MB                                  + 6-char code (10 min, one use)
-                              type K7Q2MB ──────────► verify code
-                              store long token ◄────── return long token, burn code
-                              record voice  ─────────► X-Wear-Token: <long token>
+רשימת קניות — 30.7.2026
+• חלב × 2
+• לחם
+• עגבניות × 6
 ```
+(Bought items are excluded by default.)
 
-## Changes
+### Technical details
 
-**Database (migration)**
-- Add `pairing_code` (text), `pairing_code_expires_at` (timestamptz) to `wear_devices`, with a unique index on active codes.
+**Database** — one migration creating `public.grocery_items`:
+- `id`, `user_id`, `name` (text), `quantity` (int, default 1), `is_bought` (bool, default false), `position` (int for ordering), `created_at`, `updated_at` + updated-at trigger.
+- GRANTs for `authenticated` and `service_role`, RLS enabled, single policy scoping all access to `auth.uid() = user_id`.
 
-**Server**
-- `createWearDevice` also generates a 6-character code (ambiguity-free alphabet, no 0/O/1/I) and returns it instead of the raw token.
-- New public endpoint `POST /api/public/wear/pair`: takes `{ code }`, validates it's unpaired and unexpired, returns the long device token, and clears the code so it can't be reused.
+**Server** — `src/lib/groceries.functions.ts` with `createServerFn` + `requireSupabaseAuth`, following the same shape as `tasks.functions.ts`: `listGroceries`, `addGroceryItem`, `updateGroceryItem` (toggle bought / edit name+qty), `deleteGroceryItem`, `clearBoughtGroceries`.
 
-**Web UI (Settings → Wear OS pairing dialog)**
-- Display the short code in large monospace type with a copy button and a "valid for 10 minutes" note, in Hebrew and English.
+**Route** — `src/routes/_authenticated/groceries.tsx` using the loader + `useSuspenseQuery` pattern, its own `head()` with a unique title/description, `errorComponent`/`notFoundComponent`, and the existing `PageHeader`/`EmptyState` primitives.
 
-**Wear OS app**
-- Pairing screen accepts 6 characters (auto-uppercase, `maxLength=6`), calls `/api/public/wear/pair`, saves the returned token, and shows a clear error for invalid/expired codes.
-- README updated to describe the short code.
+**Navigation** — add a `ShoppingCart` entry to `NAV` in `src/components/app-shell.tsx` (sidebar + mobile bottom bar).
 
-Existing paired watches keep working — their stored tokens are untouched.
+**Export helper** — uses `navigator.share({ text })` when available, otherwise `navigator.clipboard.writeText` with a sonner toast.
+
+**i18n** — new `groceries.*` keys in `src/lib/i18n.ts` for both Hebrew and English.
+
+Out of scope for now: voice-assistant integration, dashboard widget, categories/aisles. Easy to add later if you want them.

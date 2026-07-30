@@ -11,6 +11,7 @@ import {
   Plus,
   LogOut,
   Mic,
+  ShoppingCart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -29,6 +30,7 @@ const NAV: NavItem[] = [
   { to: "/tasks", labelKey: "nav.tasks", icon: CheckSquare },
   { to: "/journal", labelKey: "nav.journal", icon: BookHeart },
   { to: "/archive", labelKey: "nav.archive", icon: Archive },
+  { to: "/groceries", labelKey: "nav.groceries", icon: ShoppingCart },
   { to: "/learn", labelKey: "nav.learn", icon: Sparkles },
   { to: "/settings", labelKey: "nav.settings", icon: Settings },
 ];
