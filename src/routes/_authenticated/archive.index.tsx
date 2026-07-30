@@ -88,9 +88,12 @@ function ArchivePage() {
   const allTags: string[] = Array.from(
     new Set<string>(items.flatMap((i: any) => (i.tags || []) as string[])),
   ).sort();
+  const MAX_VISIBLE_TAGS = 12;
   const visibleTags = mode === "tags"
     ? allTags.filter((tag: string) => !search.trim() || tag.toLowerCase().includes(search.trim().toLowerCase()))
     : [];
+  const shownTags = visibleTags.slice(0, MAX_VISIBLE_TAGS);
+  const remainingTags = visibleTags.length - shownTags.length;
 
   const filtered = items.filter((i: any) => {
     if (type !== "all" && i.item_type !== type) return false;
