@@ -25,6 +25,7 @@ import { Route as AuthenticatedArchiveNewRouteImport } from './routes/_authentic
 import { Route as AuthenticatedArchiveImportRouteImport } from './routes/_authenticated/archive.import'
 import { Route as AuthenticatedArchiveIdRouteImport } from './routes/_authenticated/archive.$id'
 import { Route as ApiPublicWearVoiceRouteImport } from './routes/api/public/wear/voice'
+import { Route as ApiPublicWearPairRouteImport } from './routes/api/public/wear/pair'
 
 const CaptureRoute = CaptureRouteImport.update({
   id: '/capture',
@@ -108,6 +109,11 @@ const ApiPublicWearVoiceRoute = ApiPublicWearVoiceRouteImport.update({
   path: '/api/public/wear/voice',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiPublicWearPairRoute = ApiPublicWearPairRouteImport.update({
+  id: '/api/public/wear/pair',
+  path: '/api/public/wear/pair',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByFullPath {
   '/journal/new': typeof AuthenticatedJournalNewRoute
   '/archive/': typeof AuthenticatedArchiveIndexRoute
   '/journal/': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/pair': typeof ApiPublicWearPairRoute
   '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRoutesByTo {
@@ -141,6 +148,7 @@ export interface FileRoutesByTo {
   '/journal/new': typeof AuthenticatedJournalNewRoute
   '/archive': typeof AuthenticatedArchiveIndexRoute
   '/journal': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/pair': typeof ApiPublicWearPairRoute
   '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRoutesById {
@@ -160,6 +168,7 @@ export interface FileRoutesById {
   '/_authenticated/journal/new': typeof AuthenticatedJournalNewRoute
   '/_authenticated/archive/': typeof AuthenticatedArchiveIndexRoute
   '/_authenticated/journal/': typeof AuthenticatedJournalIndexRoute
+  '/api/public/wear/pair': typeof ApiPublicWearPairRoute
   '/api/public/wear/voice': typeof ApiPublicWearVoiceRoute
 }
 export interface FileRouteTypes {
@@ -179,6 +188,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/archive/'
     | '/journal/'
+    | '/api/public/wear/pair'
     | '/api/public/wear/voice'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/journal/new'
     | '/archive'
     | '/journal'
+    | '/api/public/wear/pair'
     | '/api/public/wear/voice'
   id:
     | '__root__'
@@ -214,6 +225,7 @@ export interface FileRouteTypes {
     | '/_authenticated/journal/new'
     | '/_authenticated/archive/'
     | '/_authenticated/journal/'
+    | '/api/public/wear/pair'
     | '/api/public/wear/voice'
   fileRoutesById: FileRoutesById
 }
@@ -222,6 +234,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   CaptureRoute: typeof CaptureRoute
+  ApiPublicWearPairRoute: typeof ApiPublicWearPairRoute
   ApiPublicWearVoiceRoute: typeof ApiPublicWearVoiceRoute
 }
 
@@ -339,6 +352,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicWearVoiceRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/public/wear/pair': {
+      id: '/api/public/wear/pair'
+      path: '/api/public/wear/pair'
+      fullPath: '/api/public/wear/pair'
+      preLoaderRoute: typeof ApiPublicWearPairRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -378,18 +398,9 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   CaptureRoute: CaptureRoute,
+  ApiPublicWearPairRoute: ApiPublicWearPairRoute,
   ApiPublicWearVoiceRoute: ApiPublicWearVoiceRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -6,8 +6,9 @@
     <string name="processing">Sending…</string>
     <string name="done">Done</string>
     <string name="error">Could not send. Try again.</string>
-    <string name="pairing_code">Pairing code</string>
-    <string name="pairing_hint">Paste the code from Settings → Wear OS in your Soul Organizer app.</string>
+    <string name="pairing_code">6-char code</string>
+    <string name="pairing_hint">Enter the 6-character code from Settings → Wear OS in your Soul Organizer app. It expires after 10 minutes.</string>
+
     <string name="pairing_button">Pair watch</string>
     <string name="paired">Paired</string>
     <string name="pairing_failed">Pairing failed</string>

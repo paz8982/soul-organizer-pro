@@ -25,27 +25,42 @@ export const listWearDevices = createServerFn({ method: "GET" })
     }>;
   });
 
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
 export const createWearDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((data: unknown) => z.object({ label: z.string().min(1).max(100) }).parse(data))
   .handler(async ({ data, context }) => {
     const { createHash, randomBytes } = await import("crypto");
     const supabase = context.supabase as Supabase;
-    const token = randomBytes(32).toString("hex");
-    const hash = createHash("sha256").update(token).digest("hex");
+
+    // Short, human-typable pairing code. The real long token is generated on the
+    // device when it exchanges this code at /api/public/wear/pair.
+    const bytes = randomBytes(6);
+    const code = Array.from(bytes)
+      .map((b) => CODE_ALPHABET[b % CODE_ALPHABET.length])
+      .join("");
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+
+    // Placeholder secret: unusable until pairing replaces it.
+    const placeholder = createHash("sha256").update(randomBytes(32)).digest("hex");
+
     const { data: row, error } = await supabase
       .from("wear_devices")
       .insert({
         user_id: context.userId,
         label: data.label,
-        token_hash: hash,
-        token_last_four: token.slice(-4),
+        token_hash: placeholder,
+        token_last_four: "----",
+        pairing_code: code,
+        pairing_code_expires_at: expiresAt,
       })
       .select("id, label, token_last_four, enabled, created_at")
       .single();
     if (error) throw new Error(error.message);
-    return { ...(row as any), token };
+    return { ...(row as any), code, expiresAt };
   });
+
 
 export const updateWearDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

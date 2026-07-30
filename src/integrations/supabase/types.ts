@@ -291,6 +291,8 @@ export type Database = {
           id: string
           label: string
           last_used_at: string | null
+          pairing_code: string | null
+          pairing_code_expires_at: string | null
           token_hash: string
           token_last_four: string
           updated_at: string
@@ -302,6 +304,8 @@ export type Database = {
           id?: string
           label?: string
           last_used_at?: string | null
+          pairing_code?: string | null
+          pairing_code_expires_at?: string | null
           token_hash: string
           token_last_four: string
           updated_at?: string
@@ -313,6 +317,8 @@ export type Database = {
           id?: string
           label?: string
           last_used_at?: string | null
+          pairing_code?: string | null
+          pairing_code_expires_at?: string | null
           token_hash?: string
           token_last_four?: string
           updated_at?: string

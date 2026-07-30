@@ -19,15 +19,18 @@ In the Soul Organizer web app:
 - Go to **Settings → Wear OS**.
 - Tap **Pair new watch**.
 - Give the watch a name (e.g. "My Galaxy Watch").
-- Copy the generated pairing code.
+- A **6-character pairing code** appears (e.g. `K7Q2MB`). It is valid for 10 minutes and can be used once.
 
 On the watch:
 
 - Open the **Soul Voice** app.
 - Tap **Pairing**.
-- Paste the pairing code and tap **Pair watch**.
+- Type the 6-character code and tap **Pair watch**.
+
+The watch exchanges the short code for a long device token (via `POST /api/public/wear/pair`) and stores it, so you never type the long secret.
 
 The base URL is already set to your published app (`https://soul-organizer-pro.lovable.app`). If you ever republish under a different domain, update the URL in the watch pairing screen.
+
 
 ### 2. Build and install
 
