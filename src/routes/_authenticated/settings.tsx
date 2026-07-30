@@ -131,15 +131,15 @@ function SettingsPage() {
         <Card className="p-6">
           <h2 className="mb-4 font-display text-xl">{t("settings.wearOS")}</h2>
           <div className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <Watch className="h-4 w-4 text-muted-foreground" />
-                <div>
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <Watch className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                <div className="min-w-0">
                   <p className="font-medium">{t("settings.wearInstallApp")}</p>
-                  <p className="text-xs text-muted-foreground">{t("settings.wearInstallAppHint")}</p>
+                  <p className="w-full text-xs text-muted-foreground">{t("settings.wearInstallAppHint")}</p>
                 </div>
               </div>
-              <Button variant="outline" onClick={() => setPairingDialogOpen(true)}>
+              <Button variant="outline" className="self-start sm:shrink-0" onClick={() => setPairingDialogOpen(true)}>
                 <Plus className="ms-1.5 h-4 w-4" /> {t("settings.wearAddDevice")}
               </Button>
             </div>
