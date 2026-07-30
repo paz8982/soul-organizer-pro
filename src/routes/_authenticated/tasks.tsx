@@ -105,28 +105,30 @@ function TasksPage() {
         }
       />
 
-      <div className="mb-4 flex flex-wrap items-center gap-2">
+      <div className="mb-4 flex flex-col gap-2">
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)} className="w-auto">
           <TabsList>
             <TabsTrigger value="active">{t("status.active")}</TabsTrigger>
             <TabsTrigger value="completed">{t("status.completed")}</TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="relative min-w-0 flex-1">
-          <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("tasks.searchPlaceholder")} className="pe-8" />
+        <div className="flex flex-wrap items-center gap-2">
+          <div className="relative min-w-0 flex-1">
+            <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+            <Input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t("tasks.searchPlaceholder")} className="pe-8" />
+          </div>
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="w-[140px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filter.allPriorities")}</SelectItem>
+              <SelectItem value="high">{t("priority.high")}</SelectItem>
+              <SelectItem value="medium">{t("priority.medium")}</SelectItem>
+              <SelectItem value="low">{t("priority.low")}</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
-        <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-          <SelectTrigger className="w-[140px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("filter.allPriorities")}</SelectItem>
-            <SelectItem value="high">{t("priority.high")}</SelectItem>
-            <SelectItem value="medium">{t("priority.medium")}</SelectItem>
-            <SelectItem value="low">{t("priority.low")}</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
 
       {filtered.length === 0 ? (

@@ -148,7 +148,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main className="flex-1 px-4 pb-24 pt-6 md:px-8 md:pb-8">{children}</main>
 
         {/* Mobile bottom nav */}
-        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-5 border-t bg-background/95 backdrop-blur md:hidden">
+        <nav className="fixed inset-x-0 bottom-0 z-30 grid grid-cols-6 border-t bg-background/95 backdrop-blur md:hidden">
           {NAV.filter((item) => item.to !== "/dashboard").map((item) => {
             const active = location.pathname === item.to || location.pathname.startsWith(item.to + "/");
             const Icon = item.icon;
@@ -157,12 +157,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                 key={item.to}
                 to={item.to}
                 className={cn(
-                  "flex flex-col items-center gap-1 py-2.5 text-[11px]",
+                  "flex min-w-0 flex-col items-center gap-1 px-0.5 py-2.5 text-[10px]",
                   active ? "text-primary" : "text-muted-foreground",
                 )}
               >
-                <Icon className="h-5 w-5" />
-                <span>{t(item.labelKey)}</span>
+                <Icon className="h-5 w-5 shrink-0" />
+                <span className="w-full truncate text-center leading-tight">{t(item.labelKey)}</span>
               </Link>
             );
           })}
