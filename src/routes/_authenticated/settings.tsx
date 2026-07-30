@@ -284,12 +284,14 @@ function PairingDialog({
           {token ? (
             <div className="space-y-3">
               <p className="text-sm text-muted-foreground">{t("settings.wearTokenWarning")}</p>
-              <div className="relative">
-                <Input value={token} readOnly dir="ltr" className="font-mono text-sm" />
+              <div className="flex items-center justify-center gap-2 rounded-xl bg-muted p-4">
+                <span dir="ltr" className="font-mono text-4xl font-semibold tracking-[0.35em]">
+                  {token}
+                </span>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="absolute inset-y-0 end-1 my-auto h-7 w-7"
+                  className="h-8 w-8"
                   onClick={() => {
                     navigator.clipboard.writeText(token);
                     toast.success(t("settings.wearTokenCopied"));
@@ -300,6 +302,7 @@ function PairingDialog({
               </div>
             </div>
           ) : (
+
             <>
               <div className="space-y-2">
                 <Label>{t("settings.wearDeviceLabel")}</Label>
