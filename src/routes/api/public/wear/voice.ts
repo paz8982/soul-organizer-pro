@@ -97,54 +97,33 @@ export const Route = createFileRoute("/api/public/wear/voice")({
           }
 
           // Execute the action as the device owner via service role.
+          const allowedTables = ["tasks", "journal_entries", "archive_items"] as const;
           const result = await executeVoiceAction({
             action: voiceResult.action,
             supabase: {
               from: (table: string) => {
+                if (!(allowedTables as readonly string[]).includes(table)) {
+                  throw new Error(`Unknown table ${table}`);
+                }
                 const user_id = device.user_id;
-                if (table === "tasks") {
-                  return {
-                    insert: async (values: any) => {
-                      const { data: rows, error } = await supabase
-                        .from("tasks")
-                        .insert({ ...values, user_id })
-                        .select()
-                        .single();
-                      if (error) throw error;
-                      return { data: rows, error: null };
-                    },
-                  };
-                }
-                if (table === "journal_entries") {
-                  return {
-                    insert: async (values: any) => {
-                      const { data: rows, error } = await supabase
-                        .from("journal_entries")
-                        .insert({ ...values, user_id })
-                        .select()
-                        .single();
-                      if (error) throw error;
-                      return { data: rows, error: null };
-                    },
-                  };
-                }
-                if (table === "archive_items") {
-                  return {
-                    insert: async (values: any) => {
-                      const { data: rows, error } = await supabase
-                        .from("archive_items")
-                        .insert({ ...values, user_id })
-                        .select()
-                        .single();
-                      if (error) throw error;
-                      return { data: rows, error: null };
-                    },
-                  };
-                }
-                throw new Error(`Unknown table ${table}`);
+                return {
+                  insert: (values: any) => ({
+                    select: () => ({
+                      single: async () => {
+                        const { data: row, error } = await (supabase as any)
+                          .from(table)
+                          .insert({ ...values, user_id })
+                          .select()
+                          .single();
+                        return { data: row, error };
+                      },
+                    }),
+                  }),
+                };
               },
             } as any,
           });
+
 
           return Response.json(
             {
