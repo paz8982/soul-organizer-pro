@@ -100,7 +100,7 @@ function ArchivePage() {
       />
 
 
-      <div className="mb-2 flex flex-wrap gap-2">
+      <div className="mb-2 flex flex-col gap-2">
         <div className="relative min-w-0 flex-1">
           <Search className="pointer-events-none absolute end-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
           <Input
@@ -116,33 +116,35 @@ function ArchivePage() {
             className="pe-8"
           />
         </div>
-        <Button
-          variant="secondary"
-          onClick={runSmart}
-          disabled={smartSearch.isPending || search.trim().length < 2}
-          className="shrink-0"
-        >
-          {smartSearch.isPending ? (
-            <Loader2 className="ms-1.5 h-4 w-4 animate-spin" />
-          ) : (
-            <Sparkles className="ms-1.5 h-4 w-4" />
-          )}
-          {t("archive.smartSearch")}
-        </Button>
-        <Select value={type} onValueChange={setType}>
-          <SelectTrigger className="w-[150px]">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">{t("filter.allTypes")}</SelectItem>
-            <SelectItem value="note">{t("types.notes")}</SelectItem>
-            <SelectItem value="link">{t("types.links")}</SelectItem>
-            <SelectItem value="image">{t("types.images")}</SelectItem>
-            <SelectItem value="pdf">{t("types.pdfs")}</SelectItem>
-            <SelectItem value="doc">{t("types.docs")}</SelectItem>
-            <SelectItem value="file">{t("types.files")}</SelectItem>
-          </SelectContent>
-        </Select>
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="secondary"
+            onClick={runSmart}
+            disabled={smartSearch.isPending || search.trim().length < 2}
+            className="shrink-0"
+          >
+            {smartSearch.isPending ? (
+              <Loader2 className="ms-1.5 h-4 w-4 animate-spin" />
+            ) : (
+              <Sparkles className="ms-1.5 h-4 w-4" />
+            )}
+            {t("archive.smartSearch")}
+          </Button>
+          <Select value={type} onValueChange={setType}>
+            <SelectTrigger className="w-[150px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">{t("filter.allTypes")}</SelectItem>
+              <SelectItem value="note">{t("types.notes")}</SelectItem>
+              <SelectItem value="link">{t("types.links")}</SelectItem>
+              <SelectItem value="image">{t("types.images")}</SelectItem>
+              <SelectItem value="pdf">{t("types.pdfs")}</SelectItem>
+              <SelectItem value="doc">{t("types.docs")}</SelectItem>
+              <SelectItem value="file">{t("types.files")}</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <p className="mb-4 text-xs text-muted-foreground">{t("archive.smartHint")}</p>
