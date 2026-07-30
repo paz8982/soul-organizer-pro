@@ -85,9 +85,11 @@ function ArchivePage() {
     if (m === "smart" && search.trim().length >= 2) runSmart();
   };
 
-  const allTags = Array.from(new Set(items.flatMap((i: any) => i.tags || []))).sort();
+  const allTags: string[] = Array.from(
+    new Set(items.flatMap((i: any) => (i.tags || []) as string[])),
+  ).sort();
   const visibleTags = mode === "tags"
-    ? allTags.filter((tag) => !search.trim() || tag.toLowerCase().includes(search.trim().toLowerCase()))
+    ? allTags.filter((tag: string) => !search.trim() || tag.toLowerCase().includes(search.trim().toLowerCase()))
     : [];
 
   const filtered = items.filter((i: any) => {
