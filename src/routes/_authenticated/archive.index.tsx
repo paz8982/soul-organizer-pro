@@ -86,7 +86,7 @@ function ArchivePage() {
   };
 
   const allTags: string[] = Array.from(
-    new Set(items.flatMap((i: any) => (i.tags || []) as string[])),
+    new Set<string>(items.flatMap((i: any) => (i.tags || []) as string[])),
   ).sort();
   const visibleTags = mode === "tags"
     ? allTags.filter((tag: string) => !search.trim() || tag.toLowerCase().includes(search.trim().toLowerCase()))
