@@ -97,7 +97,7 @@ export const Route = createFileRoute("/api/public/wear/voice")({
           }
 
           // Execute the action as the device owner via service role.
-          const allowedTables = ["tasks", "journal_entries", "archive_items"] as const;
+          const allowedTables = ["tasks", "journal_entries", "archive_items", "grocery_items"] as const;
           const result = await executeVoiceAction({
             action: voiceResult.action,
             supabase: {
