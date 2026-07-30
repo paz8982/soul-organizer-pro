@@ -69,7 +69,7 @@ export async function processVoiceAudio({
   const ab = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer;
   const blob = new Blob([ab], { type: mimeType });
   const form = new FormData();
-  form.append("model", "openai/gpt-4o-mini-transcribe");
+  form.append("model", "openai/gpt-4o-transcribe");
   form.append("file", blob, `recording.${ext}`);
   if (locale === "he") form.append("language", "he");
   else form.append("language", "en");
