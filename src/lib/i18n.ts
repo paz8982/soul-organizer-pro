@@ -383,7 +383,11 @@ const he: Dict = {
   "quick.title": "הוספה מהירה",
   "quick.tab.task": "משימה",
   "quick.tab.capture": "לכידה",
+  "quick.tab.journal": "יומן",
+  "quick.tab.archive": "ארכיון",
+  "quick.tab.grocery": "קניות",
   "quick.taskAdded": "המשימה נוספה",
+  "quick.groceryAdded": "הפריט נוסף לרשימת הקניות",
 
 
   "groceries.title": "רשימת קניות",
