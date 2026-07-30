@@ -29,12 +29,17 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:hint="@string/pairing_code"
-            android:textSize="14sp"
-            android:inputType="textNoSuggestions"
+            android:textSize="22sp"
+            android:gravity="center"
+            android:maxLength="6"
+            android:letterSpacing="0.2"
+            android:fontFamily="monospace"
+            android:inputType="textCapCharacters|textNoSuggestions"
             app:layout_constraintTop_toBottomOf="@id/title"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginTop="12dp" />
+
 
         <EditText
             android:id="@+id/urlInput"

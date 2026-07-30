@@ -1,6 +1,7 @@
 package com.soulorganizer.watch
 
 import android.os.Bundle
+import android.text.InputFilter
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
@@ -17,18 +18,31 @@ class PairingActivity : FragmentActivity() {
         val pairButton = findViewById<Button>(R.id.pairButton)
 
         urlInput.setText(SoulApi.getBaseUrl())
+        tokenInput.filters = arrayOf(InputFilter.LengthFilter(6), InputFilter.AllCaps())
 
         pairButton.setOnClickListener {
-            val token = tokenInput.text.toString().trim()
-            val url = urlInput.text.toString().trim()
-            if (token.length < 16) {
+            val code = tokenInput.text.toString().trim().uppercase()
+            val url = urlInput.text.toString().trim().ifBlank { SoulApi.getBaseUrl() }
+            if (code.length != 6) {
                 Toast.makeText(this, R.string.pairing_failed, Toast.LENGTH_SHORT).show()
                 return@setOnClickListener
             }
-            SoulApi.setToken(token)
-            if (url.isNotBlank()) SoulApi.setBaseUrl(url)
-            Toast.makeText(this, R.string.paired, Toast.LENGTH_SHORT).show()
-            finish()
+            pairButton.isEnabled = false
+            SoulApi.pairWithCode(code, url) { success, error ->
+                runOnUiThread {
+                    pairButton.isEnabled = true
+                    if (success) {
+                        Toast.makeText(this, R.string.paired, Toast.LENGTH_SHORT).show()
+                        finish()
+                    } else {
+                        Toast.makeText(
+                            this,
+                            error ?: getString(R.string.pairing_failed),
+                            Toast.LENGTH_LONG,
+                        ).show()
+                    }
+                }
+            }
         }
     }
 }
