@@ -16,6 +16,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedTasksRouteImport } from './routes/_authenticated/tasks'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLearnRouteImport } from './routes/_authenticated/learn'
+import { Route as AuthenticatedGroceriesRouteImport } from './routes/_authenticated/groceries'
 import { Route as AuthenticatedDashboardRouteImport } from './routes/_authenticated/dashboard'
 import { Route as AuthenticatedJournalIndexRouteImport } from './routes/_authenticated/journal.index'
 import { Route as AuthenticatedArchiveIndexRouteImport } from './routes/_authenticated/archive.index'
@@ -59,6 +60,11 @@ const AuthenticatedSettingsRoute = AuthenticatedSettingsRouteImport.update({
 const AuthenticatedLearnRoute = AuthenticatedLearnRouteImport.update({
   id: '/learn',
   path: '/learn',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const AuthenticatedGroceriesRoute = AuthenticatedGroceriesRouteImport.update({
+  id: '/groceries',
+  path: '/groceries',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const AuthenticatedDashboardRoute = AuthenticatedDashboardRouteImport.update({
@@ -120,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/groceries': typeof AuthenticatedGroceriesRoute
   '/learn': typeof AuthenticatedLearnRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -138,6 +145,7 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/dashboard': typeof AuthenticatedDashboardRoute
+  '/groceries': typeof AuthenticatedGroceriesRoute
   '/learn': typeof AuthenticatedLearnRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/tasks': typeof AuthenticatedTasksRoute
@@ -158,6 +166,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/capture': typeof CaptureRoute
   '/_authenticated/dashboard': typeof AuthenticatedDashboardRoute
+  '/_authenticated/groceries': typeof AuthenticatedGroceriesRoute
   '/_authenticated/learn': typeof AuthenticatedLearnRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/tasks': typeof AuthenticatedTasksRoute
@@ -178,6 +187,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capture'
     | '/dashboard'
+    | '/groceries'
     | '/learn'
     | '/settings'
     | '/tasks'
@@ -196,6 +206,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capture'
     | '/dashboard'
+    | '/groceries'
     | '/learn'
     | '/settings'
     | '/tasks'
@@ -215,6 +226,7 @@ export interface FileRouteTypes {
     | '/auth'
     | '/capture'
     | '/_authenticated/dashboard'
+    | '/_authenticated/groceries'
     | '/_authenticated/learn'
     | '/_authenticated/settings'
     | '/_authenticated/tasks'
@@ -287,6 +299,13 @@ declare module '@tanstack/react-router' {
       path: '/learn'
       fullPath: '/learn'
       preLoaderRoute: typeof AuthenticatedLearnRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/groceries': {
+      id: '/_authenticated/groceries'
+      path: '/groceries'
+      fullPath: '/groceries'
+      preLoaderRoute: typeof AuthenticatedGroceriesRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/dashboard': {
@@ -364,6 +383,7 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedDashboardRoute: typeof AuthenticatedDashboardRoute
+  AuthenticatedGroceriesRoute: typeof AuthenticatedGroceriesRoute
   AuthenticatedLearnRoute: typeof AuthenticatedLearnRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedTasksRoute: typeof AuthenticatedTasksRoute
@@ -378,6 +398,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedDashboardRoute: AuthenticatedDashboardRoute,
+  AuthenticatedGroceriesRoute: AuthenticatedGroceriesRoute,
   AuthenticatedLearnRoute: AuthenticatedLearnRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedTasksRoute: AuthenticatedTasksRoute,
@@ -404,13 +425,3 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

@@ -92,6 +92,39 @@ export type Database = {
         }
         Relationships: []
       }
+      grocery_items: {
+        Row: {
+          created_at: string
+          id: string
+          is_bought: boolean
+          name: string
+          position: number
+          quantity: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_bought?: boolean
+          name: string
+          position?: number
+          quantity?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_bought?: boolean
+          name?: string
+          position?: number
+          quantity?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       journal_entries: {
         Row: {
           body: string
