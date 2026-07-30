@@ -727,7 +727,11 @@ const en: Dict = {
   "quick.title": "Quick add",
   "quick.tab.task": "Task",
   "quick.tab.capture": "Capture",
+  "quick.tab.journal": "Journal",
+  "quick.tab.archive": "Archive",
+  "quick.tab.grocery": "Groceries",
   "quick.taskAdded": "Task added",
+  "quick.groceryAdded": "Added to groceries",
 
 
   "groceries.title": "Groceries",
