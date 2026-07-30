@@ -302,8 +302,9 @@ const he: Dict = {
   "settings.wearDeviceLabelHint": "לדוג׳ Galaxy Watch שלי",
   "settings.wearGenerateToken": "יצירת קוד pairing",
   "settings.wearTokenGenerated": "קוד pairing נוצר",
-  "settings.wearTokenWarning": "הקוד יופיע פעם אחת בלבד. העתק אותו לשעון.",
+  "settings.wearTokenWarning": "הקלד את הקוד בן 6 התווים בשעון. הקוד תקף ל-10 דקות ולשימוש חד-פעמי.",
   "settings.wearTokenCopied": "הקוד הועתק",
+
   "settings.wearRevoke": "ביטול חיבור",
   "settings.wearRevokeConfirm": "לבטל את החיבור לשעון?",
   "settings.wearEnabled": "פעיל",
