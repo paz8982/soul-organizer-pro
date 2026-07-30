@@ -7,75 +7,129 @@
     android:padding="16dp"
     android:background="?android:attr/colorBackground">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:boxedEdges="all">
 
-        <TextView
-            android:id="@+id/title"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/pairing_title"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="8dp">
 
-        <EditText
-            android:id="@+id/tokenInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="@string/pairing_code"
-            android:textSize="22sp"
-            android:gravity="center"
-            android:maxLength="6"
-            android:letterSpacing="0.2"
-            android:fontFamily="monospace"
-            android:inputType="textCapCharacters|textNoSuggestions|text" 
-            android:digits="ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-            app:layout_constraintTop_toBottomOf="@id/title"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="12dp" />
+            <TextView
+                android:id="@+id/title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pairing_title"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:layout_marginTop="8dp" />
 
+            <EditText
+                android:id="@+id/tokenInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/pairing_code"
+                android:textSize="14sp"
+                android:inputType="textCapCharacters|textNoSuggestions"
+                android:digits="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+                android:layout_marginTop="12dp" />
 
-        <EditText
-            android:id="@+id/urlInput"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:hint="Base URL"
-            android:textSize="12sp"
-            android:inputType="textUri"
-            app:layout_constraintTop_toBottomOf="@id/tokenInput"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            <EditText
+                android:id="@+id/urlInput"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="Base URL"
+                android:textSize="12sp"
+                android:inputType="textUri"
+                android:layout_marginTop="8dp" />
 
-        <TextView
-            android:id="@+id/hint"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:text="@string/pairing_hint"
-            android:textSize="12sp"
-            android:textAlignment="center"
-            app:layout_constraintTop_toBottomOf="@id/urlInput"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            <TextView
+                android:id="@+id/hint"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/pairing_hint"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/pairButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pairing_button"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginBottom="8dp" />
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/voice_language"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                android:layout_marginTop="16dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="4dp">
+
+                <Button
+                    android:id="@+id/langAutoButton"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/lang_auto"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#333333"
+                    android:textSize="11sp"
+                    android:minHeight="32dp" />
+
+                <Button
+                    android:id="@+id/langEnButton"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/lang_en"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#333333"
+                    android:textSize="11sp"
+                    android:minHeight="32dp" />
+
+                <Button
+                    android:id="@+id/langHeButton"
+                    style="?android:attr/buttonBarButtonStyle"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="@string/lang_he"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#333333"
+                    android:textSize="11sp"
+                    android:minHeight="32dp" />
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="16dp">
+
+                <Button
+                    android:id="@+id/pairButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/pairing_button"
+                    android:textColor="#FFFFFF"
+                    android:backgroundTint="#333333"
+                    android:textSize="12sp" />
+
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.wear.widget.BoxInsetLayout>

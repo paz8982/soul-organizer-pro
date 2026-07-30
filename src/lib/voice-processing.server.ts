@@ -71,8 +71,12 @@ export async function processVoiceAudio({
   const form = new FormData();
   form.append("model", "openai/gpt-4o-mini-transcribe");
   form.append("file", blob, `recording.${ext}`);
-  if (locale === "he") form.append("language", "he");
-  else form.append("language", "en");
+  if (locale === "he") {
+    form.append("language", "he");
+    form.append("prompt", "הקלטה בעברית.");
+  } else {
+    form.append("language", "en");
+  }
 
   const sttRes = await fetch(`${GATEWAY}/audio/transcriptions`, {
     method: "POST",

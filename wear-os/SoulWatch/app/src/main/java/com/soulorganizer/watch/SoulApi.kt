@@ -3,6 +3,7 @@ package com.soulorganizer.watch
 import android.content.Context
 import android.content.SharedPreferences
 import android.util.Base64
+import org.json.JSONObject
 import okhttp3.Call
 import okhttp3.Callback
 import okhttp3.FormBody
@@ -21,6 +22,7 @@ object SoulApi {
     private const val PREFS_NAME = "soul_watch"
     private const val KEY_TOKEN = "token"
     private const val KEY_BASE_URL = "base_url"
+    private const val KEY_LANGUAGE = "voice_language"
 
     private const val DEFAULT_BASE_URL = "https://soul-organizer-pro.lovable.app"
 
@@ -49,11 +51,18 @@ object SoulApi {
     }
 
     fun setBaseUrl(url: String) {
-        prefs.edit().putString(KEY_BASE_URL, url).apply()
+        val normalizedUrl = url.trim().removeSuffix("/")
+        prefs.edit().putString(KEY_BASE_URL, normalizedUrl).apply()
     }
 
     fun clearToken() {
         prefs.edit().remove(KEY_TOKEN).apply()
+    }
+
+    fun getLanguage(): String = prefs.getString(KEY_LANGUAGE, "auto") ?: "auto"
+
+    fun setLanguage(lang: String) {
+        prefs.edit().putString(KEY_LANGUAGE, lang).apply()
     }
 
     /**
@@ -96,12 +105,17 @@ object SoulApi {
         onResult: (Result: VoiceResponse) -> Unit,
     ) {
         val token = getToken() ?: return onResult(VoiceResponse(success = false, error = "Not paired"))
-        val url = "${getBaseUrl()}/api/public/wear/voice"
+        val baseUrl = getBaseUrl()
+        val url = "$baseUrl/api/public/wear/voice"
+
+        android.util.Log.d("SoulApi", "Sending recording to $url (token length: ${token.length}, language: $locale)")
 
         val mimeType = "audio/mp4"
         val requestBody = MultipartBody.Builder()
             .setType(MultipartBody.FORM)
             .addFormDataPart("locale", locale)
+            .addFormDataPart("language", locale)
+            .addFormDataPart("language_code", locale)
             .addFormDataPart(
                 "audio",
                 file.name,
@@ -127,6 +141,41 @@ object SoulApi {
         })
     }
 
+    fun testConnection(
+        token: String,
+        baseUrl: String,
+        onResult: (success: Boolean, error: String?) -> Unit,
+    ) {
+        val normalizedBaseUrl = baseUrl.trim().removeSuffix("/")
+        val url = "$normalizedBaseUrl/api/public/wear/voice"
+        
+        android.util.Log.d("SoulApi", "Testing connection to $url")
+
+        val request = Request.Builder()
+            .url(url)
+            .header("X-Wear-Token", token)
+            .post(FormBody.Builder().build()) // Empty body to trigger 400 or 401
+            .build()
+
+        client.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                onResult(false, e.message)
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                val code = response.code
+                val body = response.body?.string() ?: ""
+                android.util.Log.d("SoulApi", "Test response code: $code, body: $body")
+                
+                when (code) {
+                    200, 400 -> onResult(true, null) // 400 means "Missing audio", which implies token is valid
+                    401 -> onResult(false, "Invalid token")
+                    else -> onResult(false, "Server error: $code")
+                }
+            }
+        })
+    }
+
     data class VoiceResponse(
         val success: Boolean,
         val action: String? = null,
@@ -137,14 +186,16 @@ object SoulApi {
 
     private fun parseVoiceResponse(json: String): VoiceResponse {
         return try {
-            val regex = Regex(""""([^"]+)"\s*:\s*"([^"]*)"""")
-            val map = regex.findAll(json).associate { it.groupValues[1] to it.groupValues[2] }
+            val obj = JSONObject(json)
+            fun getStringOrNull(key: String): String? {
+                return if (obj.isNull(key)) null else obj.optString(key).takeIf { it.isNotEmpty() || obj.has(key) }
+            }
             VoiceResponse(
-                success = map["success"]?.toBoolean() ?: false,
-                action = map["action"],
-                transcript = map["transcript"],
-                title = map["title"],
-                error = map["error"],
+                success = obj.optBoolean("success", false),
+                action = getStringOrNull("action"),
+                transcript = getStringOrNull("transcript"),
+                title = getStringOrNull("title"),
+                error = getStringOrNull("error"),
             )
         } catch (e: Exception) {
             VoiceResponse(success = false, error = "Invalid response")

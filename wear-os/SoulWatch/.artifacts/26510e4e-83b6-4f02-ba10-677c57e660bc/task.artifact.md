@@ -1,0 +1,5 @@
+- [x] Update `SoulApi.kt`: Normalize URL, add logging, and implement `testConnection`
+- [x] Update `activity_pairing.xml`: Add a "Test" button
+- [x] Update `PairingActivity.kt`: Implement "Test Connection" logic and better validation
+- [x] Update `MainActivity.kt`: Improve "Session expired" message
+- [x] Final manual verification

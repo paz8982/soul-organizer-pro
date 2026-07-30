@@ -4,80 +4,68 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp"
+    android:padding="12dp"
     android:background="?android:attr/colorBackground">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:fillViewport="true"
         app:boxedEdges="all">
 
-        <ImageView
-            android:id="@+id/micIcon"
-            android:layout_width="48dp"
-            android:layout_height="48dp"
-            android:src="@android:drawable/ic_btn_speak_now"
-            android:contentDescription="@string/tap_to_record"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="16dp" />
-
-        <TextView
-            android:id="@+id/statusText"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/tap_to_record"
-            android:textSize="16sp"
-            android:textAlignment="center"
-            app:layout_constraintTop_toBottomOf="@id/micIcon"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:padding="4dp">
 
-        <ProgressBar
-            android:id="@+id/progressBar"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/statusText"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            <Button
+                android:id="@+id/recordButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:backgroundTint="#333333"
+                android:minHeight="56dp"
+                android:text="@string/tap_to_record"
+                android:textColor="#FFFFFF" />
 
-        <TextView
-            android:id="@+id/resultText"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:textSize="14sp"
-            android:textAlignment="center"
-            android:visibility="gone"
-            app:layout_constraintTop_toBottomOf="@id/progressBar"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginTop="8dp" />
+            <ProgressBar
+                android:id="@+id/progressBar"
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:visibility="gone"
+                android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/recordButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/tap_to_record"
-            app:layout_constraintBottom_toTopOf="@id/settingsButton"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            android:layout_marginBottom="8dp" />
+            <TextView
+                android:id="@+id/statusText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/tap_to_record"
+                android:textSize="14sp"
+                android:textAlignment="center"
+                android:layout_marginTop="8dp" />
 
-        <Button
-            android:id="@+id/settingsButton"
-            style="?android:attr/borderlessButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/pairing_title"
-            android:textSize="12sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            <TextView
+                android:id="@+id/resultText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textAlignment="center"
+                android:visibility="gone"
+                android:layout_marginTop="4dp" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+            <Button
+                android:id="@+id/settingsButton"
+                style="?android:attr/borderlessButtonStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/pairing_title"
+                android:textSize="11sp"
+                android:layout_marginTop="12dp"
+                android:layout_marginBottom="16dp" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </androidx.wear.widget.BoxInsetLayout>

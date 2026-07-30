@@ -3,11 +3,14 @@ package com.soulorganizer.watch
 import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.View
-import android.widget.ImageView
+import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.Toast
@@ -25,7 +28,7 @@ class MainActivity : FragmentActivity() {
     private lateinit var statusText: TextView
     private lateinit var resultText: TextView
     private lateinit var progressBar: ProgressBar
-    private lateinit var micIcon: ImageView
+    private lateinit var recordButton: Button
     private var isRecording = false
 
     private val permissionLauncher = registerForActivityResult(
@@ -46,9 +49,9 @@ class MainActivity : FragmentActivity() {
         statusText = findViewById(R.id.statusText)
         resultText = findViewById(R.id.resultText)
         progressBar = findViewById(R.id.progressBar)
-        micIcon = findViewById(R.id.micIcon)
+        recordButton = findViewById(R.id.recordButton)
 
-        findViewById<View>(R.id.recordButton).setOnClickListener {
+        recordButton.setOnClickListener {
             if (isRecording) {
                 stopRecording()
             } else {
@@ -77,10 +80,15 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun updateUi() {
-        if (SoulApi.isPaired()) {
-            statusText.text = getString(R.string.tap_to_record)
-        } else {
-            statusText.text = getString(R.string.open_phone)
+        if (!isRecording) {
+            recordButton.isEnabled = true
+            recordButton.setText(R.string.tap_to_record)
+            recordButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333"))
+            if (SoulApi.isPaired()) {
+                statusText.text = ""
+            } else {
+                statusText.text = getString(R.string.open_phone)
+            }
         }
     }
 
@@ -89,48 +97,79 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun startRecording() {
-        try {
-            recorder.start()
-            isRecording = true
-            statusText.text = getString(R.string.recording)
-            resultText.visibility = View.GONE
-            progressBar.visibility = View.GONE
-            micIcon.setImageResource(android.R.drawable.ic_btn_speak_now)
-            vibrate(50)
-        } catch (e: Exception) {
-            showError(e.message ?: "Recording failed")
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                recorder.start()
+                launch(Dispatchers.Main) {
+                    isRecording = true
+                    recordButton.setText(R.string.stop_recording)
+                    recordButton.backgroundTintList = ColorStateList.valueOf(
+                        ContextCompat.getColor(this@MainActivity, android.R.color.holo_red_dark)
+                    )
+                    statusText.text = getString(R.string.recording)
+                    resultText.visibility = View.GONE
+                    progressBar.visibility = View.GONE
+                    vibrate(50)
+                }
+            } catch (e: Exception) {
+                launch(Dispatchers.Main) {
+                    showError(e.message ?: "Recording failed")
+                }
+            }
         }
     }
 
     private fun stopRecording() {
         isRecording = false
+        recordButton.isEnabled = false
+        recordButton.setText(R.string.processing)
+        recordButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333"))
+        
         statusText.text = getString(R.string.processing)
         progressBar.visibility = View.VISIBLE
-        micIcon.setImageResource(android.R.drawable.ic_lock_idle_low_battery)
         vibrate(30)
 
-        val file = recorder.stop()
-        if (file == null || file.length() < 1024) {
-            showError(getString(R.string.error))
-            return
-        }
+        lifecycleScope.launch(Dispatchers.IO) {
+            val file = recorder.stop()
+            if (file == null || file.length() < 1024) {
+                launch(Dispatchers.Main) {
+                    showError(getString(R.string.error))
+                }
+                return@launch
+            }
 
-        val locale = if (resources.configuration.locales.get(0).language == "he") "he" else "en"
-        SoulApi.sendVoiceRecording(file, locale) { response ->
-            lifecycleScope.launch(Dispatchers.Main) {
-                progressBar.visibility = View.GONE
-                if (response.success) {
-                    resultText.visibility = View.VISIBLE
-                    val label = when (response.action) {
-                        "task" -> "Task created"
-                        "journal" -> "Journal saved"
-                        "search_archive" -> "Saved to archive"
-                        else -> "Done"
+            val savedLang = SoulApi.getLanguage()
+            val locale = if (savedLang == "auto") {
+                val sysLang = resources.configuration.locales.get(0).language
+                if (sysLang == "he" || sysLang == "iw") "he" else "en"
+            } else {
+                savedLang
+            }
+
+            SoulApi.sendVoiceRecording(file, locale) { response ->
+                lifecycleScope.launch(Dispatchers.Main) {
+                    recordButton.isEnabled = true
+                    recordButton.setText(R.string.tap_to_record)
+                    progressBar.visibility = View.GONE
+                    if (response.success) {
+                        resultText.visibility = View.VISIBLE
+                        val label = when (response.action) {
+                            "task" -> "Task created"
+                            "journal" -> "Journal saved"
+                            "search_archive" -> "Saved to archive"
+                            else -> "Done"
+                        }
+                        statusText.text = getString(R.string.done)
+                        resultText.text = "${label}\n${response.title ?: response.transcript ?: ""}"
+                    } else {
+                        if (response.error?.contains("device token", ignoreCase = true) == true) {
+                            SoulApi.clearToken()
+                            showError(getString(R.string.session_expired))
+                            openPairing()
+                        } else {
+                            showError(response.error ?: getString(R.string.error))
+                        }
                     }
-                    statusText.text = getString(R.string.done)
-                    resultText.text = "${label}\n${response.title ?: response.transcript ?: ""}"
-                } else {
-                    showError(response.error ?: getString(R.string.error))
                 }
             }
         }
@@ -147,7 +186,11 @@ class MainActivity : FragmentActivity() {
     }
 
     private fun showError(message: String) {
-        statusText.text = getString(R.string.tap_to_record)
+        isRecording = false
+        recordButton.isEnabled = true
+        recordButton.setText(R.string.tap_to_record)
+        recordButton.backgroundTintList = ColorStateList.valueOf(Color.parseColor("#333333"))
+        statusText.text = ""
         progressBar.visibility = View.GONE
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }

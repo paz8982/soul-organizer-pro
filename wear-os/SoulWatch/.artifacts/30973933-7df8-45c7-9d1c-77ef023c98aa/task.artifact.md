@@ -1,0 +1,2 @@
+- [x] Update `settings.gradle.kts` with repository configurations
+- [x] Run Gradle sync to verify fix
