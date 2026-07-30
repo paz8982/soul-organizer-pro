@@ -16,6 +16,8 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { createTask } from "@/lib/tasks.functions";
 import { createArchiveItem } from "@/lib/archive.functions";
+import { createJournalEntry } from "@/lib/journal.functions";
+import { addGroceryItem } from "@/lib/groceries.functions";
 import { toast } from "sonner";
 import { t } from "@/lib/i18n";
 
@@ -26,7 +28,7 @@ export function QuickAddDialog({
   open: boolean;
   onOpenChange: (v: boolean) => void;
 }) {
-  const [tab, setTab] = useState<"task" | "capture">("task");
+  const [tab, setTab] = useState<"task" | "journal" | "capture" | "grocery">("task");
   const navigate = useNavigate();
   const qc = useQueryClient();
 
@@ -34,17 +36,27 @@ export function QuickAddDialog({
   const [priority, setPriority] = useState<"high" | "medium" | "low">("medium");
   const [dueDate, setDueDate] = useState("");
 
+  const [journalTitle, setJournalTitle] = useState("");
+  const [journalBody, setJournalBody] = useState("");
+
   const [capTitle, setCapTitle] = useState("");
   const [capNotes, setCapNotes] = useState("");
   const [capUrl, setCapUrl] = useState("");
+
+  const [groceryName, setGroceryName] = useState("");
+  const [groceryQty, setGroceryQty] = useState(1);
 
   const reset = () => {
     setTitle("");
     setPriority("medium");
     setDueDate("");
+    setJournalTitle("");
+    setJournalBody("");
     setCapTitle("");
     setCapNotes("");
     setCapUrl("");
+    setGroceryName("");
+    setGroceryQty(1);
   };
 
   const taskMut = useMutation({
@@ -60,6 +72,26 @@ export function QuickAddDialog({
     onSuccess: () => {
       qc.invalidateQueries();
       toast.success(t("quick.taskAdded"));
+      reset();
+      onOpenChange(false);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
+  });
+
+  const journalMut = useMutation({
+    mutationFn: () =>
+      createJournalEntry({
+        data: {
+          entry_date: new Date().toISOString().slice(0, 10),
+          title: journalTitle || null,
+          body: journalBody,
+          tags: [],
+          image_urls: [],
+        } as any,
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries();
+      toast.success(t("journal.saved"));
       reset();
       onOpenChange(false);
     },
@@ -87,6 +119,20 @@ export function QuickAddDialog({
     onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
   });
 
+  const groceryMut = useMutation({
+    mutationFn: () =>
+      addGroceryItem({
+        data: { name: groceryName, quantity: groceryQty || 1 },
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries();
+      toast.success(t("quick.groceryAdded"));
+      reset();
+      onOpenChange(false);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : t("action.failed")),
+  });
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg">
@@ -94,9 +140,11 @@ export function QuickAddDialog({
           <DialogTitle className="font-display text-2xl">{t("quick.title")}</DialogTitle>
         </DialogHeader>
         <Tabs value={tab} onValueChange={(v) => setTab(v as any)}>
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="task">{t("quick.tab.task")}</TabsTrigger>
-            <TabsTrigger value="capture">{t("quick.tab.capture")}</TabsTrigger>
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="task" className="text-xs sm:text-sm">{t("quick.tab.task")}</TabsTrigger>
+            <TabsTrigger value="journal" className="text-xs sm:text-sm">{t("quick.tab.journal")}</TabsTrigger>
+            <TabsTrigger value="capture" className="text-xs sm:text-sm">{t("quick.tab.archive")}</TabsTrigger>
+            <TabsTrigger value="grocery" className="text-xs sm:text-sm">{t("quick.tab.grocery")}</TabsTrigger>
           </TabsList>
 
           <TabsContent value="task" className="space-y-4 pt-4">
@@ -131,6 +179,27 @@ export function QuickAddDialog({
             </DialogFooter>
           </TabsContent>
 
+          <TabsContent value="journal" className="space-y-4 pt-4">
+            <div className="space-y-2">
+              <Label>{t("label.title")}</Label>
+              <Input
+                value={journalTitle}
+                onChange={(e) => setJournalTitle(e.target.value)}
+                placeholder={t("label.titleOptional")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>{t("label.notes")}</Label>
+              <Textarea value={journalBody} onChange={(e) => setJournalBody(e.target.value)} rows={5} />
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("action.cancel")}</Button>
+              <Button onClick={() => journalMut.mutate()} disabled={!journalBody.trim() || journalMut.isPending}>
+                {t("action.save")}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+
           <TabsContent value="capture" className="space-y-4 pt-4">
             <div className="space-y-2">
               <Label>{t("label.title")}</Label>
@@ -147,6 +216,34 @@ export function QuickAddDialog({
             <DialogFooter>
               <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("action.cancel")}</Button>
               <Button onClick={() => capMut.mutate()} disabled={(!capTitle && !capUrl && !capNotes) || capMut.isPending}>
+                {t("action.save")}
+              </Button>
+            </DialogFooter>
+          </TabsContent>
+
+          <TabsContent value="grocery" className="space-y-4 pt-4">
+            <div className="grid grid-cols-[1fr_auto] gap-3">
+              <div className="space-y-2">
+                <Label>{t("label.title")}</Label>
+                <Input
+                  value={groceryName}
+                  onChange={(e) => setGroceryName(e.target.value)}
+                  placeholder={t("groceries.namePlaceholder")}
+                />
+              </div>
+              <div className="w-24 space-y-2">
+                <Label>{t("groceries.quantity")}</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={groceryQty}
+                  onChange={(e) => setGroceryQty(Math.max(1, Number(e.target.value) || 1))}
+                />
+              </div>
+            </div>
+            <DialogFooter>
+              <Button variant="ghost" onClick={() => onOpenChange(false)}>{t("action.cancel")}</Button>
+              <Button onClick={() => groceryMut.mutate()} disabled={!groceryName.trim() || groceryMut.isPending}>
                 {t("action.save")}
               </Button>
             </DialogFooter>

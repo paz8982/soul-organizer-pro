@@ -14,6 +14,7 @@ import { t, useLocale } from "@/lib/i18n";
 import { processVoiceCommand } from "@/lib/voice.functions";
 import { createTask } from "@/lib/tasks.functions";
 import { createJournalEntry } from "@/lib/journal.functions";
+import { addGroceryItem } from "@/lib/groceries.functions";
 
 type Phase = "idle" | "recording" | "processing";
 
@@ -156,6 +157,16 @@ export function VoiceCommandDialog({
       toast.success(t("journal.saved"));
       onOpenChange(false);
       navigate({ to: "/journal" });
+      return;
+    }
+    if (action.type === "grocery") {
+      await addGroceryItem({
+        data: { name: action.name, quantity: action.quantity ?? 1 },
+      });
+      qc.invalidateQueries();
+      toast.success(t("quick.groceryAdded"));
+      onOpenChange(false);
+      navigate({ to: "/groceries" });
       return;
     }
     if (action.type === "search_archive") {

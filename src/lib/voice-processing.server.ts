@@ -22,6 +22,11 @@ const actionSchema = z.object({
       query: z.string(),
     }),
     z.object({
+      type: z.literal("grocery"),
+      name: z.string(),
+      quantity: z.number().int().min(1).max(999).default(1),
+    }),
+    z.object({
       type: z.literal("unknown"),
       reason: z.string().optional(),
     }),
@@ -94,17 +99,19 @@ export async function processVoiceAudio({
   const sys =
     locale === "he"
       ? `אתה עוזר שממיר בקשה קולית קצרה של המשתמש לפעולה מובנית באפליקציית "המוח השני".
-בחר את סוג הפעולה מתוך: task (משימה חדשה), journal (רשומת יומן), search_archive (חיפוש בארכיון), unknown.
+בחר את סוג הפעולה מתוך: task (משימה חדשה), journal (רשומת יומן), search_archive (חיפוש בארכיון), grocery (הוספת פריט לרשימת הקניות), unknown.
 - task: חלץ כותרת קצרה, עדיפות (high/medium/low) אם ניתן להסיק, ותאריך יעד ב-YYYY-MM-DD אם המשתמש ציין (היום הוא ${today}).
 - journal: העתק את מה שהמשתמש רוצה לכתוב ל-body. כותרת קצרה אם ברור.
 - search_archive: חלץ את מונח החיפוש בלבד.
+- grocery: אם המשתמש מבקש להוסיף מוצר לרשימת הקניות/סופר — חלץ את שם המוצר ל-name וכמות ל-quantity (ברירת מחדל 1).
 - unknown: אם לא ברור מה הבקשה.
 ענה JSON בלבד לפי הסכימה.`
       : `You convert a short user voice request into a structured action for the "Second Brain" app.
-Pick action type from: task (new task), journal (journal entry), search_archive (archive search), unknown.
+Pick action type from: task (new task), journal (journal entry), search_archive (archive search), grocery (add an item to the grocery list), unknown.
 - task: extract a short title, priority (high/medium/low) if inferrable, and due_date YYYY-MM-DD if the user mentioned one (today is ${today}).
 - journal: put what the user wants to write into body. Short title if obvious.
 - search_archive: extract only the search query.
+- grocery: if the user wants to add something to the shopping/grocery list, extract the item into name and the amount into quantity (default 1).
 - unknown: if unclear.
 Return JSON only per schema.`;
 
@@ -131,7 +138,7 @@ Return JSON only per schema.`;
             properties: {
               type: {
                 type: "string",
-                enum: ["task", "journal", "search_archive", "unknown"],
+                enum: ["task", "journal", "search_archive", "grocery", "unknown"],
               },
               title: { type: ["string", "null"] },
               body: { type: ["string", "null"] },
@@ -142,6 +149,8 @@ Return JSON only per schema.`;
               due_date: { type: ["string", "null"] },
               description: { type: ["string", "null"] },
               query: { type: ["string", "null"] },
+              name: { type: ["string", "null"] },
+              quantity: { type: ["number", "null"] },
               reason: { type: ["string", "null"] },
             },
             required: [
@@ -152,6 +161,8 @@ Return JSON only per schema.`;
               "due_date",
               "description",
               "query",
+              "name",
+              "quantity",
               "reason",
             ],
           },
@@ -188,6 +199,13 @@ Return JSON only per schema.`;
     action = { type: "journal", title: parsed.title ?? null, body: parsed.body };
   } else if (parsed.type === "search_archive" && parsed.query) {
     action = { type: "search_archive", query: parsed.query };
+  } else if (parsed.type === "grocery" && parsed.name) {
+    const qty = Number(parsed.quantity);
+    action = {
+      type: "grocery",
+      name: parsed.name,
+      quantity: Number.isFinite(qty) && qty >= 1 ? Math.min(999, Math.round(qty)) : 1,
+    };
   } else {
     action = { type: "unknown", reason: parsed.reason ?? undefined };
   }
@@ -250,6 +268,16 @@ export async function executeVoiceAction({
       .single();
     if (error) throw new Error(error.message);
     return { type: "search_archive" as const, id: row.id, title: row.title };
+  }
+
+  if (action.type === "grocery") {
+    const { data: row, error } = await supabase
+      .from("grocery_items")
+      .insert({ name: action.name, quantity: action.quantity })
+      .select()
+      .single();
+    if (error) throw new Error(error.message);
+    return { type: "grocery" as const, id: row.id, title: row.name };
   }
 
   return { type: "unknown" as const, id: null, title: null };

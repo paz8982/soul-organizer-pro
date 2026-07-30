@@ -383,7 +383,11 @@ const he: Dict = {
   "quick.title": "הוספה מהירה",
   "quick.tab.task": "משימה",
   "quick.tab.capture": "לכידה",
+  "quick.tab.journal": "יומן",
+  "quick.tab.archive": "ארכיון",
+  "quick.tab.grocery": "קניות",
   "quick.taskAdded": "המשימה נוספה",
+  "quick.groceryAdded": "הפריט נוסף לרשימת הקניות",
 
 
   "groceries.title": "רשימת קניות",
@@ -723,7 +727,11 @@ const en: Dict = {
   "quick.title": "Quick add",
   "quick.tab.task": "Task",
   "quick.tab.capture": "Capture",
+  "quick.tab.journal": "Journal",
+  "quick.tab.archive": "Archive",
+  "quick.tab.grocery": "Groceries",
   "quick.taskAdded": "Task added",
+  "quick.groceryAdded": "Added to groceries",
 
 
   "groceries.title": "Groceries",
