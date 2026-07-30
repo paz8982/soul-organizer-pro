@@ -25,7 +25,7 @@ export const listWearDevices = createServerFn({ method: "GET" })
     }>;
   });
 
-const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+const CODE_ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ";
 
 export const createWearDevice = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])

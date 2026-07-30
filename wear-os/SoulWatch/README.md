@@ -19,7 +19,7 @@ In the Soul Organizer web app:
 - Go to **Settings → Wear OS**.
 - Tap **Pair new watch**.
 - Give the watch a name (e.g. "My Galaxy Watch").
-- A **6-character pairing code** appears (e.g. `K7Q2MB`). It is valid for 10 minutes and can be used once.
+- A **6-letter pairing code** appears (e.g. `KAQMBX`). It is valid for 10 minutes and can be used once.
 
 On the watch:
 

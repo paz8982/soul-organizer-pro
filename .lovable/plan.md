@@ -1,6 +1,6 @@
-# 6-Character Watch Pairing Code
+# 6-Letter Watch Pairing Code
 
-Today the app shows a 64-character device token that must be typed on the watch. Instead, the app will show a short **6-character code** (uppercase letters/digits, e.g. `K7Q2MB`), valid for 10 minutes and single-use. The watch types the short code once, exchanges it behind the scenes for the real long token, and stores that token permanently. Security stays the same because the long secret never has to be typed.
+Today the app shows a 64-character device token that must be typed on the watch. Instead, the app will show a short **6-letter code** (uppercase letters only, e.g. `KAQMBX`), valid for 10 minutes and single-use. The watch types the short code once, exchanges it behind the scenes for the real long token, and stores that token permanently. Security stays the same because the long secret never has to be typed.
 
 ## Flow
 
