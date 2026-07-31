@@ -1,3 +1,5 @@
+import { isFacebookUrl, resolveFacebookLink } from "./facebook-resolve.server";
+
 const GATEWAY = "https://ai.gateway.lovable.dev/v1";
 
 const MAX_CHARS = 12_000;
@@ -62,7 +64,10 @@ export async function extractArchiveContent(
   const apiKey = process.env.LOVABLE_API_KEY;
   const chunks: string[] = [];
 
-  if (item.url) {
+  if (item.url && isFacebookUrl(item.url)) {
+    const fb = await resolveFacebookLink(item.url);
+    if (fb.caption) chunks.push(fb.caption);
+  } else if (item.url) {
     try {
       const res = await fetch(item.url, {
         headers: {
