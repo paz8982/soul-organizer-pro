@@ -491,7 +491,9 @@ function RatingRow({
           </button>
         );
       })}
+      </div>
     </div>
+
   );
 }
 
