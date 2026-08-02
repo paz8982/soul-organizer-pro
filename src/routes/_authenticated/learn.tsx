@@ -467,8 +467,9 @@ function RatingRow({
     },
   ];
   return (
-    <div className="mt-3 flex flex-wrap items-center gap-2 rounded-xl border bg-muted/30 p-2">
-      <span className="ms-1 text-sm text-muted-foreground">{t("learn.rate.prompt")}</span>
+    <div className="mt-3 rounded-xl border bg-muted/30 p-2">
+      <span className="ms-1 block text-sm text-muted-foreground">{t("learn.rate.prompt")}</span>
+      <div className="mt-2 flex flex-nowrap items-center gap-2">
       {options.map((o) => {
         const active = value === o.v;
         return (
@@ -490,7 +491,9 @@ function RatingRow({
           </button>
         );
       })}
+      </div>
     </div>
+
   );
 }
 
