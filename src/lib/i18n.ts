@@ -232,6 +232,8 @@ const he: Dict = {
   "archive.saved": "נשמר לארכיון",
   "archive.confirmDelete": "למחוק את הפריט הזה מהארכיון?",
   "archive.back": "חזרה לארכיון",
+  "archive.titleRequired": "יש להזין כותרת",
+
   "archive.downloadFile": "הורדת הקובץ",
   "archive.fetchFromLink": "השלמה אוטומטית מהקישור",
   "archive.fetching": "טוען פרטים מהקישור…",
