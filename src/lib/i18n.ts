@@ -598,6 +598,8 @@ const en: Dict = {
   "archive.fetchFailed": "Couldn't fetch details from that link",
   "archive.analyzingFile": "Analyzing the file…",
   "archive.titleHintFile": "Leave empty and we'll generate a title from the file",
+  "archive.untitled": "Untitled",
+
 
   "archive.smartSearch": "Smart search",
   "archive.smartSearchPlaceholder": "Ask a question — e.g. all my pasta recipes",
