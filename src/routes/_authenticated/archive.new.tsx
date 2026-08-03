@@ -245,11 +245,9 @@ function NewArchiveItem() {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) {
-                    setFile(f);
-                    if (!title) setTitle(f.name);
-                  }
+                  if (f) setFile(f);
                 }}
+
               />
             </button>
           </TabsContent>
