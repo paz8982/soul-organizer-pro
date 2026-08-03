@@ -6,6 +6,8 @@ import { createArchiveItem } from "@/lib/archive.functions";
 import { indexArchiveItem } from "@/lib/archive-search.functions";
 
 import { enrichLink } from "@/lib/link-enrich.functions";
+import { enrichFile } from "@/lib/file-enrich.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
