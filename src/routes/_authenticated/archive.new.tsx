@@ -98,7 +98,7 @@ function NewArchiveItem() {
       }
 
       const payload: any = {
-        title: effectiveTitle || (url ? url : file?.name ?? "ללא כותרת"),
+        title: effectiveTitle,
         description: effectiveDescription || null,
         notes: notes || null,
         tags: effectiveTags,
@@ -108,8 +108,10 @@ function NewArchiveItem() {
       if (tab === "link") {
         payload.item_type = "link";
         payload.url = url;
+        payload.title = effectiveTitle || url;
       } else if (tab === "note") {
         payload.item_type = "note";
+        payload.title = effectiveTitle || t("archive.untitled");
       } else if (file) {
         setUploading(true);
         const { data: userRes } = await supabase.auth.getUser();
@@ -126,10 +128,48 @@ function NewArchiveItem() {
         payload.file_path = path;
         payload.file_mime = file.type;
         payload.file_size = file.size;
+
+        // No title yet? Let AI look inside the file (image, PDF, doc, text).
+        if (!effectiveTitle.trim()) {
+          setAnalyzing(true);
+          try {
+            const res = await enrichFile({
+              data: {
+                path,
+                mime: file.type || "application/octet-stream",
+                filename: file.name,
+                locale: getLocale(),
+              },
+            });
+            if (res.title) {
+              effectiveTitle = res.title;
+              setTitle(res.title);
+            }
+            if (res.description && !effectiveDescription) {
+              effectiveDescription = res.description;
+              setDescription(res.description);
+            }
+            if (res.tags?.length) {
+              const merged = [...effectiveTags];
+              for (const tg of res.tags) if (!merged.includes(tg)) merged.push(tg);
+              effectiveTags = merged.slice(0, 8);
+              setTags(effectiveTags);
+            }
+          } catch {
+            /* fall back to the file name below */
+          } finally {
+            setAnalyzing(false);
+          }
+        }
+
+        payload.title = effectiveTitle || file.name;
+        payload.description = effectiveDescription || null;
+        payload.tags = effectiveTags;
       } else {
         throw new Error(t("archive.pleasePickFile"));
       }
       return createArchiveItem({ data: payload });
+
     },
     onSuccess: (row: any) => {
       qc.invalidateQueries();
