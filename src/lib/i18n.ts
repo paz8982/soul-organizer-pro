@@ -593,6 +593,8 @@ const en: Dict = {
   "archive.saved": "Saved to archive",
   "archive.confirmDelete": "Delete this item from the archive?",
   "archive.back": "Back to archive",
+  "archive.titleRequired": "Please enter a title",
+
   "archive.downloadFile": "Download file",
   "archive.fetchFromLink": "Auto-fill from link",
   "archive.fetching": "Fetching link details…",
