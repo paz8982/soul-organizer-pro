@@ -52,6 +52,8 @@ function NewArchiveItem() {
   const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const source = search.title || search.text || search.url ? "share" : "manual";
