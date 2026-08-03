@@ -288,8 +288,9 @@ function NewArchiveItem() {
           <Button variant="ghost" onClick={() => navigate({ to: "/archive" })}>{t("action.cancel")}</Button>
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || uploading}>
             {(mut.isPending || uploading) && <Loader2 className="ms-2 h-4 w-4 animate-spin" />}
-            {t("action.save")}
+            {analyzing ? t("archive.analyzingFile") : t("action.save")}
           </Button>
+
         </div>
       </Card>
     </div>
