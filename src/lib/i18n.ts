@@ -239,6 +239,8 @@ const he: Dict = {
   "archive.fetchFailed": "לא הצלחתי לטעון פרטים מהקישור",
   "archive.analyzingFile": "מנתח את הקובץ…",
   "archive.titleHintFile": "אפשר להשאיר ריק — ניצור כותרת אוטומטית מתוך הקובץ",
+  "archive.untitled": "ללא כותרת",
+
 
   "archive.smartSearch": "חיפוש חכם",
   "archive.smartSearchPlaceholder": "שאל שאלה — למשל: כל מתכוני הפסטה שלי",
