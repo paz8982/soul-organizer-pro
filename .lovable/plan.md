@@ -1,42 +1,22 @@
-## The problem (verified)
+# Meaningful titles for images saved in the Archive
 
-Your archive has ~20 items whose URL is a Facebook share link. When the app fetched them, Facebook returned a login wall — the extracted content for those rows is literally the word `Facebook`. Some rows still got a good Hebrew title/description (from the WhatsApp message text around them), but others are generic, e.g.:
+Today, picking an image in the Archive "file" tab copies the file name into the title, so items end up called things like `IMG_20260803.jpg`. Instead, the title stays empty for you to fill in — and if you leave it empty and hit save, AI looks at the image itself and writes a title, a short description, and tags.
 
-- `סרטון Reels בפייסבוק` / `סרטון קצר (Reel) המשותף ברשת החברתית פייסבוק` / tags `פייסבוק, מדיה חברתית, סרטון, רילס`
+## Behaviour
 
-## What I found that makes a fix possible
+1. Choosing a file no longer auto-fills the title (for any file type).
+2. On save with an empty title:
+   - The file uploads first (as it does now).
+   - AI inspects the image and returns title + description + tags in the app's current language (Hebrew or English).
+   - The AI title fills the title, the description fills the description if you left it empty, and the tags merge into whatever tags you already added (max 8).
+   - The save button shows a short "analyzing" state while this runs.
+3. If AI fails or the file isn't an image (PDF/doc/other), fall back to the current behaviour: use the file name as the title, so saving never blocks.
+4. Link and note tabs are unchanged.
 
-Fetching the share link with Facebook's own crawler user-agent returns the canonical reel URL, and that URL's slug contains the **original Hebrew caption of the video**, plus a **thumbnail image** of the dish. Example (real item from your archive):
+## Technical notes
 
-```text
-share/r/1DHFsjTvd6  →  reel/965892372427132
-  → og:url slug: "אצבעות פולנטה ופקורינו איטליאנו מגוררת... רכות מבפנים וק..."
-  → og:image: thumbnail JPG of the food
-```
-
-That's enough for the AI to write a real title, description and tags.
-
-## Plan
-
-**1. One-time repair of existing Facebook items**
-
-For every archive item with a `facebook.com` / `fb.watch` URL:
-- Resolve the share link to its canonical reel/video URL with the crawler user-agent (with a retry, since Facebook sometimes serves an empty page).
-- Read the caption from the URL slug and the thumbnail image.
-- Send caption + thumbnail to the AI (Gemini, multimodal) and ask for: a real Hebrew title, a one-sentence description, 3–5 recipe-oriented tags, and a dense searchable text blob.
-- Write the results back to the database in a single migration, so nothing runs at page load.
-
-Only items that resolve successfully are changed. Items that stay unresolvable (link deleted, private post) keep their current values and I'll list them for you at the end.
-
-Items that already have a good title get updated too — the new data comes from the actual video, so it should be at least as accurate — but I'll keep the existing title if the AI can't do better.
-
-**2. Make it permanent for new Facebook links**
-
-Add a Facebook resolver to the link/archive enrichment pipeline (`src/lib/archive-extract.server.ts` and `src/lib/link-enrich.functions.ts`) so any Facebook link you save from now on — via share, WhatsApp import, or manual add — goes through the same caption + thumbnail path instead of hitting the login wall. This also fills `content_text` properly, so smart search can find these recipes.
-
-## Technical details
-
-- Resolver helper: new `src/lib/facebook-resolve.server.ts` — fetch with `facebookexternalhit` UA, parse `og:url` / `og:image`, URL-decode the slug into caption text, one retry on empty OG.
-- Enrichment call: existing gateway pattern (`google/gemini-3-flash-preview`, JSON schema response) with the thumbnail passed as an `image_url` content block.
-- Backfill: I run the resolver + AI in the sandbox and apply the results as literal `UPDATE public.archive_items SET title, description, tags, content_text, content_status='indexed'` statements in one migration.
-- No schema changes, no new UI.
+- New server function `enrichFile` in a new `src/lib/file-enrich.functions.ts`, mirroring `enrichLink`: auth middleware, downloads the uploaded object from the `archive` storage bucket, sends it to the AI gateway as a base64 image block, and returns `{ title, description, tags }` via a strict JSON schema. Same model family already used for link enrichment.
+- Called from `src/routes/_authenticated/archive.new.tsx` inside the existing save mutation, after upload and before `createArchiveItem`, guarded on `tab === "file" && !title.trim() && file.type.startsWith("image/")`.
+- Remove the `if (!title) setTitle(f.name)` line in the file picker.
+- New i18n keys for the "analyzing image" button state in `src/lib/i18n.ts` (he + en).
+- Existing post-save `indexArchiveItem` indexing pipeline stays as is.
