@@ -6,6 +6,8 @@ import { createArchiveItem } from "@/lib/archive.functions";
 import { indexArchiveItem } from "@/lib/archive-search.functions";
 
 import { enrichLink } from "@/lib/link-enrich.functions";
+import { enrichFile } from "@/lib/file-enrich.functions";
+
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
@@ -50,6 +52,8 @@ function NewArchiveItem() {
   const [tags, setTags] = useState<string[]>([]);
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+
   const fileRef = useRef<HTMLInputElement>(null);
 
   const source = search.title || search.text || search.url ? "share" : "manual";
@@ -98,7 +102,7 @@ function NewArchiveItem() {
       }
 
       const payload: any = {
-        title: effectiveTitle || (url ? url : file?.name ?? "ללא כותרת"),
+        title: effectiveTitle,
         description: effectiveDescription || null,
         notes: notes || null,
         tags: effectiveTags,
@@ -108,8 +112,10 @@ function NewArchiveItem() {
       if (tab === "link") {
         payload.item_type = "link";
         payload.url = url;
+        payload.title = effectiveTitle || url;
       } else if (tab === "note") {
         payload.item_type = "note";
+        payload.title = effectiveTitle || t("archive.untitled");
       } else if (file) {
         setUploading(true);
         const { data: userRes } = await supabase.auth.getUser();
@@ -126,10 +132,48 @@ function NewArchiveItem() {
         payload.file_path = path;
         payload.file_mime = file.type;
         payload.file_size = file.size;
+
+        // No title yet? Let AI look inside the file (image, PDF, doc, text).
+        if (!effectiveTitle.trim()) {
+          setAnalyzing(true);
+          try {
+            const res = await enrichFile({
+              data: {
+                path,
+                mime: file.type || "application/octet-stream",
+                filename: file.name,
+                locale: getLocale(),
+              },
+            });
+            if (res.title) {
+              effectiveTitle = res.title;
+              setTitle(res.title);
+            }
+            if (res.description && !effectiveDescription) {
+              effectiveDescription = res.description;
+              setDescription(res.description);
+            }
+            if (res.tags?.length) {
+              const merged = [...effectiveTags];
+              for (const tg of res.tags) if (!merged.includes(tg)) merged.push(tg);
+              effectiveTags = merged.slice(0, 8);
+              setTags(effectiveTags);
+            }
+          } catch {
+            /* fall back to the file name below */
+          } finally {
+            setAnalyzing(false);
+          }
+        }
+
+        payload.title = effectiveTitle || file.name;
+        payload.description = effectiveDescription || null;
+        payload.tags = effectiveTags;
       } else {
         throw new Error(t("archive.pleasePickFile"));
       }
       return createArchiveItem({ data: payload });
+
     },
     onSuccess: (row: any) => {
       qc.invalidateQueries();
@@ -201,11 +245,9 @@ function NewArchiveItem() {
                 className="hidden"
                 onChange={(e) => {
                   const f = e.target.files?.[0];
-                  if (f) {
-                    setFile(f);
-                    if (!title) setTitle(f.name);
-                  }
+                  if (f) setFile(f);
                 }}
+
               />
             </button>
           </TabsContent>
@@ -219,7 +261,11 @@ function NewArchiveItem() {
         <div className="space-y-2">
           <Label>{t("label.title")}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          {tab === "file" && (
+            <p className="text-xs text-muted-foreground">{t("archive.titleHintFile")}</p>
+          )}
         </div>
+
 
         <div className="space-y-2">
           <Label>{t("label.descriptionOptional")}</Label>
@@ -242,8 +288,9 @@ function NewArchiveItem() {
           <Button variant="ghost" onClick={() => navigate({ to: "/archive" })}>{t("action.cancel")}</Button>
           <Button onClick={() => mut.mutate()} disabled={mut.isPending || uploading}>
             {(mut.isPending || uploading) && <Loader2 className="ms-2 h-4 w-4 animate-spin" />}
-            {t("action.save")}
+            {analyzing ? t("archive.analyzingFile") : t("action.save")}
           </Button>
+
         </div>
       </Card>
     </div>
