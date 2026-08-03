@@ -261,7 +261,11 @@ function NewArchiveItem() {
         <div className="space-y-2">
           <Label>{t("label.title")}</Label>
           <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+          {tab === "file" && (
+            <p className="text-xs text-muted-foreground">{t("archive.titleHintFile")}</p>
+          )}
         </div>
+
 
         <div className="space-y-2">
           <Label>{t("label.descriptionOptional")}</Label>
