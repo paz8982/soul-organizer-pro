@@ -49,10 +49,15 @@ function ArchiveDetail() {
   });
 
   const saveMut = useMutation({
-    mutationFn: () =>
-      updateArchiveItem({
-        data: { id, patch: { title, description: description || null, notes: notes || null, tags } as any },
-      }),
+    mutationFn: () => {
+      const trimmed = title.trim();
+      if (!trimmed) throw new Error(t("archive.titleRequired"));
+      return updateArchiveItem({
+        data: { id, patch: { title: trimmed, description: description || null, notes: notes || null, tags } as any },
+      });
+    },
+    onError: (e: Error) => toast.error(e.message),
+
     onSuccess: () => {
       qc.invalidateQueries();
       toast.success(t("action.saved"));
