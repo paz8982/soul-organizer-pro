@@ -232,6 +232,8 @@ const he: Dict = {
   "archive.saved": "נשמר לארכיון",
   "archive.confirmDelete": "למחוק את הפריט הזה מהארכיון?",
   "archive.back": "חזרה לארכיון",
+  "archive.titleRequired": "יש להזין כותרת",
+
   "archive.downloadFile": "הורדת הקובץ",
   "archive.fetchFromLink": "השלמה אוטומטית מהקישור",
   "archive.fetching": "טוען פרטים מהקישור…",
@@ -591,6 +593,8 @@ const en: Dict = {
   "archive.saved": "Saved to archive",
   "archive.confirmDelete": "Delete this item from the archive?",
   "archive.back": "Back to archive",
+  "archive.titleRequired": "Please enter a title",
+
   "archive.downloadFile": "Download file",
   "archive.fetchFromLink": "Auto-fill from link",
   "archive.fetching": "Fetching link details…",
