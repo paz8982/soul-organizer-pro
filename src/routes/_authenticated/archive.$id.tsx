@@ -75,7 +75,15 @@ function ArchiveDetail() {
 
   return (
     <div className="mx-auto max-w-3xl">
-      <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/archive" })} className="mb-3 -ms-2">
+      <Button
+        variant="ghost"
+        size="sm"
+        onClick={() => {
+          if (typeof window !== "undefined" && window.history.length > 1) window.history.back();
+          else navigate({ to: "/archive" });
+        }}
+        className="mb-3 -ms-2"
+      >
         <ArrowRight className="ms-1 h-4 w-4" /> {t("archive.back")}
       </Button>
       <PageHeader
