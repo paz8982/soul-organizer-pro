@@ -11,6 +11,16 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Plus, Search, Archive as ArchiveIcon, Link as LinkIcon, FileText, Image as ImageIcon, File, Sparkles, Loader2, X, MessageCircle, Tags } from "lucide-react";
 import { t, itemTypeLabel, useLocale } from "@/lib/i18n";
 
+type SearchMode = "text" | "tags" | "smart";
+
+type ArchiveSearch = {
+  q?: string;
+  smart?: true;
+  mode?: SearchMode;
+  type?: string;
+  tag?: string;
+};
+
 const archiveQuery = queryOptions({
   queryKey: ["archive"],
   queryFn: () => listArchive(),
