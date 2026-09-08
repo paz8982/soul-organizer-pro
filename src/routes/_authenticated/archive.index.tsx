@@ -106,7 +106,7 @@ function ArchivePage() {
   };
 
   const clearSmart = () => {
-    autoRan.current = null;
+    autoRan.current = q ?? "";
     setSmartResult(null);
     smartSearch.reset();
   };
