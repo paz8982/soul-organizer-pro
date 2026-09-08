@@ -48,18 +48,38 @@ const iconFor = (type: string) => {
   return ArchiveIcon;
 };
 
-type SearchMode = "text" | "tags" | "smart";
-
 function ArchivePage() {
   const { data: items } = useSuspenseQuery(archiveQuery);
-  const { q, smart } = Route.useSearch();
+  const urlSearch = Route.useSearch();
+  const { q, smart } = urlSearch;
   const locale = useLocale();
-  const [search, setSearch] = useState(q ?? "");
-  const [type, setType] = useState("all");
-  const [mode, setMode] = useState<SearchMode>(smart ? "smart" : "text");
-  const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [smartResult, setSmartResult] = useState<{ answer: string | null; results: any[] } | null>(null);
   const navigate = useNavigate();
+
+  // All filter state lives in the URL so returning from an item restores it.
+  const search = q ?? "";
+  const mode: SearchMode = urlSearch.mode ?? (smart || q ? "smart" : "text");
+  const type = urlSearch.type ?? "all";
+  const selectedTag = urlSearch.tag ?? null;
+
+  const setUrl = (patch: Partial<ArchiveSearch>) => {
+    navigate({
+      to: "/archive",
+      search: (prev: ArchiveSearch) => {
+        const next: ArchiveSearch = { ...prev, ...patch };
+        (Object.keys(next) as (keyof ArchiveSearch)[]).forEach((k) => {
+          if (next[k] === undefined || next[k] === "") delete next[k];
+        });
+        return next;
+      },
+      replace: true,
+    });
+  };
+
+  const setSearch = (value: string) => setUrl({ q: value || undefined });
+  const setType = (value: string) => setUrl({ type: value === "all" ? undefined : value });
+  const setSelectedTag = (tag: string | null) => setUrl({ tag: tag ?? undefined });
+
+  const [smartResult, setSmartResult] = useState<{ answer: string | null; results: any[] } | null>(null);
   const autoRan = useRef<string | null>(null);
 
   const smartSearch = useMutation({
@@ -68,35 +88,32 @@ function ArchivePage() {
     onError: () => setSmartResult({ answer: t("archive.smartFailed"), results: [] }),
   });
 
+  // Deep links and returning from an item: re-run the smart search once per query.
   useEffect(() => {
-    if (q !== undefined) setSearch(q);
-  }, [q]);
-
-  // Deep links (voice assistant / share) land here with ?q= — run smart search once.
-  useEffect(() => {
+    if (mode !== "smart") return;
     if (!q || q.trim().length < 2) return;
     if (autoRan.current === q) return;
     autoRan.current = q;
-    setMode("smart");
     smartSearch.mutate(q);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q]);
+  }, [q, mode]);
 
   const runSmart = () => {
     const query = search.trim();
     if (query.length < 2) return;
+    autoRan.current = query;
     smartSearch.mutate(query);
   };
 
   const clearSmart = () => {
+    autoRan.current = null;
     setSmartResult(null);
     smartSearch.reset();
   };
 
   const switchMode = (m: SearchMode) => {
-    setMode(m);
+    setUrl({ mode: m, ...(m !== "tags" ? { tag: undefined } : {}) });
     if (m !== "smart" && smartResult) clearSmart();
-    if (m !== "tags") setSelectedTag(null);
     if (m === "smart" && search.trim().length >= 2) runSmart();
   };
 
