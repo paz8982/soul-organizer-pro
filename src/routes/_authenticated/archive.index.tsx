@@ -17,15 +17,14 @@ const archiveQuery = queryOptions({
 });
 
 export const Route = createFileRoute("/_authenticated/archive/")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    q: typeof search.q === "string" ? search.q : undefined,
-    smart: search.smart === true || search.smart === "true" ? true : undefined,
-    mode:
-      search.mode === "text" || search.mode === "tags" || search.mode === "smart"
-        ? (search.mode as SearchMode)
-        : undefined,
-    type: typeof search.type === "string" ? search.type : undefined,
-    tag: typeof search.tag === "string" ? search.tag : undefined,
+  validateSearch: (search: Record<string, unknown>): ArchiveSearch => ({
+    ...(typeof search.q === "string" && search.q ? { q: search.q } : {}),
+    ...(search.smart === true || search.smart === "true" ? { smart: true as const } : {}),
+    ...(search.mode === "text" || search.mode === "tags" || search.mode === "smart"
+      ? { mode: search.mode as SearchMode }
+      : {}),
+    ...(typeof search.type === "string" && search.type ? { type: search.type } : {}),
+    ...(typeof search.tag === "string" && search.tag ? { tag: search.tag } : {}),
   }),
   loader: ({ context }) => context.queryClient.ensureQueryData(archiveQuery),
   component: ArchivePage,
