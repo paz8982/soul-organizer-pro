@@ -161,7 +161,7 @@ function ArchivePage() {
     return true;
   });
 
-  const smartActive = smartSearch.isPending || smartResult !== null;
+  const smartActive = smartPending || smartResult !== null;
   const list = smartResult ? smartResult.results : filtered;
 
   const hasFilters = type !== "all" || selectedTag !== null;
@@ -294,13 +294,13 @@ function ArchivePage() {
         )}
       </div>
 
-      {smartSearch.isPending && (
+      {smartPending && (
         <Card className="mb-4 flex items-center gap-2 p-3 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> {t("archive.smartSearching")}
         </Card>
       )}
 
-      {smartResult && !smartSearch.isPending && (
+      {smartResult && !smartPending && (
         <Card className="mb-4 flex items-start gap-2 border-primary/30 bg-secondary/50 p-3">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 break-words text-sm">
@@ -313,7 +313,7 @@ function ArchivePage() {
       )}
 
       {list.length === 0 ? (
-        smartActive && !smartSearch.isPending ? (
+        smartActive && !smartPending ? (
           <EmptyState
             icon={<Sparkles className="h-5 w-5" />}
             title={t("archive.smartNoResults")}
