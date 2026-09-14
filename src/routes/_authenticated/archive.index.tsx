@@ -75,46 +75,67 @@ function ArchivePage() {
     });
   };
 
-  const setSearch = (value: string) => setUrl({ q: value || undefined });
+  const setSearch = (value: string) => setUrl({ q: value || undefined, mode });
   const setType = (value: string) => setUrl({ type: value === "all" ? undefined : value });
   const setSelectedTag = (tag: string | null) => setUrl({ tag: tag ?? undefined });
 
-  const [smartResult, setSmartResult] = useState<{ answer: string | null; results: any[] } | null>(null);
-  const autoRan = useRef<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const smartSearch = useMutation({
-    mutationFn: (query: string) => smartSearchArchive({ data: { query, locale } }),
-    onSuccess: (res) => setSmartResult(res as any),
-    onError: () => setSmartResult({ answer: t("archive.smartFailed"), results: [] }),
+  // Only the query text the user explicitly submitted is allowed to hit the AI.
+  const [armedQuery, setArmedQuery] = useState<string>(() =>
+    mode === "smart" ? (q ?? "").trim() : "",
+  );
+  const [cleared, setCleared] = useState(false);
+
+  const activeQuery = (q ?? "").trim();
+  const smartEnabled =
+    mode === "smart" && !cleared && activeQuery.length >= 2 && armedQuery === activeQuery;
+
+  const smartQuery = useQuery({
+    queryKey: ["archive-smart", locale, activeQuery],
+    queryFn: () => smartSearchArchive({ data: { query: activeQuery, locale } }),
+    enabled: smartEnabled,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
   });
 
-  // Deep links and returning from an item: re-run the smart search once per query.
-  useEffect(() => {
-    if (mode !== "smart") return;
-    if (!q || q.trim().length < 2) return;
-    if (autoRan.current === q) return;
-    autoRan.current = q;
-    smartSearch.mutate(q);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, mode]);
+  const smartResult: { answer: string | null; results: any[] } | null = !smartEnabled
+    ? null
+    : smartQuery.data
+      ? (smartQuery.data as any)
+      : smartQuery.isError
+        ? { answer: t("archive.smartFailed"), results: [] }
+        : null;
+
+  const smartPending = smartEnabled && smartQuery.isPending;
 
   const runSmart = () => {
     const query = search.trim();
     if (query.length < 2) return;
-    autoRan.current = query;
-    smartSearch.mutate(query);
+    setCleared(false);
+    setArmedQuery(query);
+    // Same text pressed again: force a fresh answer.
+    if (queryClient.getQueryData(["archive-smart", locale, query])) {
+      queryClient.invalidateQueries({ queryKey: ["archive-smart", locale, query] });
+    }
   };
 
   const clearSmart = () => {
-    autoRan.current = q ?? "";
-    setSmartResult(null);
-    smartSearch.reset();
+    setCleared(true);
+    setArmedQuery("");
   };
 
   const switchMode = (m: SearchMode) => {
     setUrl({ mode: m, ...(m !== "tags" ? { tag: undefined } : {}) });
-    if (m !== "smart" && smartResult) clearSmart();
-    if (m === "smart" && search.trim().length >= 2) runSmart();
+    if (m !== "smart") clearSmart();
+    if (m === "smart") {
+      setCleared(false);
+      if (search.trim().length >= 2) runSmart();
+    }
   };
 
   const allTags: string[] = Array.from(
