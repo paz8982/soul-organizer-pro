@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions, useMutation } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useSuspenseQuery, queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { listArchive } from "@/lib/archive.functions";
 import { smartSearchArchive } from "@/lib/archive-search.functions";
 import { PageHeader, EmptyState } from "@/components/page-primitives";
