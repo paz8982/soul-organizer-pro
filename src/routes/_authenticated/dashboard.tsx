@@ -47,7 +47,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl min-w-0 overflow-x-hidden">
       <PageHeader title={t(greetingKey())} description={t(subKey, { n })} />
 
-      <div className="grid min-w-0 gap-5 md:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
         {/* All active tasks — single scrollable list */}
         <Card className="min-w-0 overflow-hidden p-5 md:col-span-2">
           <div className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
