@@ -57,7 +57,7 @@ function ArchivePage() {
 
   // All filter state lives in the URL so returning from an item restores it.
   const search = q ?? "";
-  const mode: SearchMode = urlSearch.mode ?? (smart || q ? "smart" : "text");
+  const mode: SearchMode = urlSearch.mode ?? (smart ? "smart" : "text");
   const type = urlSearch.type ?? "all";
   const selectedTag = urlSearch.tag ?? null;
 
