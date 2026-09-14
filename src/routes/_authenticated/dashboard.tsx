@@ -47,7 +47,7 @@ function Dashboard() {
     <div className="mx-auto max-w-6xl min-w-0 overflow-x-hidden">
       <PageHeader title={t(greetingKey())} description={t(subKey, { n })} />
 
-      <div className="grid min-w-0 gap-5 md:grid-cols-2">
+      <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-5 md:grid-cols-2">
         {/* All active tasks — single scrollable list */}
         <Card className="min-w-0 overflow-hidden p-5 md:col-span-2">
           <div className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
@@ -68,15 +68,15 @@ function Dashboard() {
         </Card>
 
         {/* Recent journal */}
-        <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">{t("dashboard.recentJournal")}</h2>
-            <Link to="/journal" className="text-xs text-primary hover:underline">{t("dashboard.openJournal")}</Link>
+        <Card className="min-w-0 overflow-hidden p-5">
+          <div className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <h2 className="min-w-0 truncate font-display text-xl">{t("dashboard.recentJournal")}</h2>
+            <Link to="/journal" className="shrink-0 text-xs text-primary hover:underline">{t("dashboard.openJournal")}</Link>
           </div>
           {data.recentJournal.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.journalEmpty")}</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="min-w-0 space-y-2">
               {data.recentJournal.map((j: any) => (
                 <li key={j.id}>
                   <Link
@@ -101,15 +101,15 @@ function Dashboard() {
         </Card>
 
         {/* Recent archive */}
-        <Card className="p-5">
-          <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-display text-xl">{t("dashboard.recentArchive")}</h2>
-            <Link to="/archive" className="text-xs text-primary hover:underline">{t("dashboard.openArchive")}</Link>
+        <Card className="min-w-0 overflow-hidden p-5">
+          <div className="mb-3 grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
+            <h2 className="min-w-0 truncate font-display text-xl">{t("dashboard.recentArchive")}</h2>
+            <Link to="/archive" className="shrink-0 text-xs text-primary hover:underline">{t("dashboard.openArchive")}</Link>
           </div>
           {data.recentArchive.length === 0 ? (
             <p className="py-6 text-center text-sm text-muted-foreground">{t("dashboard.archiveEmpty")}</p>
           ) : (
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="grid min-w-0 grid-cols-[minmax(0,1fr)] gap-3 sm:grid-cols-2">
               {data.recentArchive.map((a: any) => (
                 <Link
                   key={a.id}
