@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useSuspenseQuery, queryOptions, useMutation } from "@tanstack/react-query";
-import { useEffect, useRef, useState } from "react";
+import { useSuspenseQuery, queryOptions, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { listArchive } from "@/lib/archive.functions";
 import { smartSearchArchive } from "@/lib/archive-search.functions";
 import { PageHeader, EmptyState } from "@/components/page-primitives";
@@ -57,7 +57,7 @@ function ArchivePage() {
 
   // All filter state lives in the URL so returning from an item restores it.
   const search = q ?? "";
-  const mode: SearchMode = urlSearch.mode ?? (smart || q ? "smart" : "text");
+  const mode: SearchMode = urlSearch.mode ?? (smart ? "smart" : "text");
   const type = urlSearch.type ?? "all";
   const selectedTag = urlSearch.tag ?? null;
 
@@ -75,46 +75,67 @@ function ArchivePage() {
     });
   };
 
-  const setSearch = (value: string) => setUrl({ q: value || undefined });
+  const setSearch = (value: string) => setUrl({ q: value || undefined, mode });
   const setType = (value: string) => setUrl({ type: value === "all" ? undefined : value });
   const setSelectedTag = (tag: string | null) => setUrl({ tag: tag ?? undefined });
 
-  const [smartResult, setSmartResult] = useState<{ answer: string | null; results: any[] } | null>(null);
-  const autoRan = useRef<string | null>(null);
+  const queryClient = useQueryClient();
 
-  const smartSearch = useMutation({
-    mutationFn: (query: string) => smartSearchArchive({ data: { query, locale } }),
-    onSuccess: (res) => setSmartResult(res as any),
-    onError: () => setSmartResult({ answer: t("archive.smartFailed"), results: [] }),
+  // Only the query text the user explicitly submitted is allowed to hit the AI.
+  const [armedQuery, setArmedQuery] = useState<string>(() =>
+    mode === "smart" ? (q ?? "").trim() : "",
+  );
+  const [cleared, setCleared] = useState(false);
+
+  const activeQuery = (q ?? "").trim();
+  const smartEnabled =
+    mode === "smart" && !cleared && activeQuery.length >= 2 && armedQuery === activeQuery;
+
+  const smartQuery = useQuery({
+    queryKey: ["archive-smart", locale, activeQuery],
+    queryFn: () => smartSearchArchive({ data: { query: activeQuery, locale } }),
+    enabled: smartEnabled,
+    staleTime: Infinity,
+    gcTime: 1000 * 60 * 60,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    retry: false,
   });
 
-  // Deep links and returning from an item: re-run the smart search once per query.
-  useEffect(() => {
-    if (mode !== "smart") return;
-    if (!q || q.trim().length < 2) return;
-    if (autoRan.current === q) return;
-    autoRan.current = q;
-    smartSearch.mutate(q);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [q, mode]);
+  const smartResult: { answer: string | null; results: any[] } | null = !smartEnabled
+    ? null
+    : smartQuery.data
+      ? (smartQuery.data as any)
+      : smartQuery.isError
+        ? { answer: t("archive.smartFailed"), results: [] }
+        : null;
+
+  const smartPending = smartEnabled && smartQuery.isPending;
 
   const runSmart = () => {
     const query = search.trim();
     if (query.length < 2) return;
-    autoRan.current = query;
-    smartSearch.mutate(query);
+    setCleared(false);
+    setArmedQuery(query);
+    // Same text pressed again: force a fresh answer.
+    if (queryClient.getQueryData(["archive-smart", locale, query])) {
+      queryClient.invalidateQueries({ queryKey: ["archive-smart", locale, query] });
+    }
   };
 
   const clearSmart = () => {
-    autoRan.current = q ?? "";
-    setSmartResult(null);
-    smartSearch.reset();
+    setCleared(true);
+    setArmedQuery("");
   };
 
   const switchMode = (m: SearchMode) => {
     setUrl({ mode: m, ...(m !== "tags" ? { tag: undefined } : {}) });
-    if (m !== "smart" && smartResult) clearSmart();
-    if (m === "smart" && search.trim().length >= 2) runSmart();
+    if (m !== "smart") clearSmart();
+    if (m === "smart") {
+      setCleared(false);
+      if (search.trim().length >= 2) runSmart();
+    }
   };
 
   const allTags: string[] = Array.from(
@@ -140,7 +161,7 @@ function ArchivePage() {
     return true;
   });
 
-  const smartActive = smartSearch.isPending || smartResult !== null;
+  const smartActive = smartPending || smartResult !== null;
   const list = smartResult ? smartResult.results : filtered;
 
   const hasFilters = type !== "all" || selectedTag !== null;
@@ -273,13 +294,13 @@ function ArchivePage() {
         )}
       </div>
 
-      {smartSearch.isPending && (
+      {smartPending && (
         <Card className="mb-4 flex items-center gap-2 p-3 text-sm text-muted-foreground">
           <Loader2 className="h-4 w-4 animate-spin" /> {t("archive.smartSearching")}
         </Card>
       )}
 
-      {smartResult && !smartSearch.isPending && (
+      {smartResult && !smartPending && (
         <Card className="mb-4 flex items-start gap-2 border-primary/30 bg-secondary/50 p-3">
           <Sparkles className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
           <p className="min-w-0 flex-1 break-words text-sm">
@@ -292,7 +313,7 @@ function ArchivePage() {
       )}
 
       {list.length === 0 ? (
-        smartActive && !smartSearch.isPending ? (
+        smartActive && !smartPending ? (
           <EmptyState
             icon={<Sparkles className="h-5 w-5" />}
             title={t("archive.smartNoResults")}
