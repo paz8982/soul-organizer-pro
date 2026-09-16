@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useSuspenseQuery, queryOptions, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { listTasks, createTask, updateTask, setTaskStatus, deleteTask } from "@/lib/tasks.functions";
 import { PageHeader, EmptyState } from "@/components/page-primitives";
 import { Card } from "@/components/ui/card";
@@ -48,6 +48,23 @@ function TasksPage() {
   const [search, setSearch] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<string>("all");
   const [editing, setEditing] = useState<TaskDraft | null>(null);
+
+  // Auto-open the new-task dialog when launched from the PWA "New Task"
+  // shortcut (/tasks?action=new). Strip the param so refreshes don't reopen it.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("action") === "new") {
+      setEditing({ ...emptyDraft });
+      params.delete("action");
+      const qs = params.toString();
+      window.history.replaceState(
+        null,
+        "",
+        window.location.pathname + (qs ? `?${qs}` : "") + window.location.hash,
+      );
+    }
+  }, []);
 
   const filtered = useMemo(() => {
     return tasks.filter((task: any) => {
